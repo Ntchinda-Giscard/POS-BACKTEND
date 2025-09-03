@@ -33,7 +33,8 @@ tables = [
     "SPRICLIST",
     "SORDER",
     "PIMPL",
-    "TABMODELIV"
+    "TABMODELIV",
+    "STOCK"
 ]
 
 for table in tables:

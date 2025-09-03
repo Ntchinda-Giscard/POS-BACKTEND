@@ -34,7 +34,17 @@ tables = [
     "SORDER",
     "PIMPL",
     "TABMODELIV",
-    "STOCK"
+    "STOCK",
+    "FACILITY",
+    "FACILITY",
+    "SORDER",
+    "BPCARRIER",
+    "COMPANY",
+    "BPDLVCUST",
+    "TABSOHTYP",
+    "TABVACBPR",
+    "SVCRVAT",
+    "ITMCATEG"
 ]
 
 for table in tables:

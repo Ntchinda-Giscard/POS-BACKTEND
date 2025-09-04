@@ -44,7 +44,12 @@ tables = [
     "TABSOHTYP",
     "TABVACBPR",
     "SVCRVAT",
-    "ITMCATEG"
+    "ITMCATEG",
+    "CBLOB",
+    "BLOBEXPENSES",
+    "ABLOB",
+    "AUTILIS",
+    "AMENUSER"
 ]
 
 for table in tables:

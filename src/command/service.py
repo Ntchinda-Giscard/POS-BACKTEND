@@ -1,6 +1,6 @@
 import sqlite3
 from typing import List
-from ..types.model import CommandTypeRRequest
+from ..command.model import CommandTypeRRequest
 
 def get_command_types() -> List[CommandTypeRRequest]:
     """Fetch command types from the database."""

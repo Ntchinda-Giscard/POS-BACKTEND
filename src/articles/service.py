@@ -19,19 +19,19 @@ def get_articles_site(input: ArticleInput) -> List[ArticleRequest]:
     T3.TCLCOD_0,
     T3.PURBASPRI_0,
     SUM(T2.QTYSTUACT_0) AS StockActif
-FROM
-    ITMFACILIT AS T1
-LEFT JOIN
-    STOCK AS T2 ON T1.ITMREF_0 = T2.ITMREF_0 AND T1.STOFCY_0 = T2.STOFCY_0
-LEFT JOIN
-    ITMMASTER AS T3 ON T1.ITMREF_0 = T3.ITMREF_0
-WHERE
-    T1.STOFCY_0 = ?
-GROUP BY
-    T1.ITMREF_0,
-    T3.ITMDES1_0,
-    T3.TCLCOD_0,
-    T3.PURBASPRI_0
+    FROM
+        ITMFACILIT AS T1
+    LEFT JOIN
+        STOCK AS T2 ON T1.ITMREF_0 = T2.ITMREF_0 AND T1.STOFCY_0 = T2.STOFCY_0
+    LEFT JOIN
+        ITMMASTER AS T3 ON T1.ITMREF_0 = T3.ITMREF_0
+    WHERE
+        T1.STOFCY_0 = ?
+    GROUP BY
+        T1.ITMREF_0,
+        T3.ITMDES1_0,
+        T3.TCLCOD_0,
+        T3.PURBASPRI_0
 
         """, (input.site_id,))
     articles = sqlite_cursor.fetchall()
@@ -40,7 +40,9 @@ GROUP BY
         results.append(ArticleRequest(
             item_code=article[0],
             describtion=article[1],
-            stock=article[2] if article[2] is not None else 0.0
+            categorie= article[2],
+            stock=article[3] if article[3] is not None else 0.0,
+            base_price=article[4] if article[4] is not None else 0.0
         ))
     return results
 

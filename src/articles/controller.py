@@ -11,7 +11,8 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=List[ArticleRequest])
-def create_article(input: ArticleInput) -> List[ArticleRequest]:
-    articlel_site_stock = get_articles_site(input)
-    return articlel_site_stock
+@router.get("/", response_model=List[ArticleRequest])
+def create_article(site_id: str) -> List[ArticleRequest]:
+    input = ArticleInput(site_id=site_id)
+    return get_articles_site(input)
+

@@ -49,7 +49,7 @@ tables = [
     "BLOBEXPENSES",
     "ABLOB",
     "AUTILIS",
-    "AMENUSER"
+    "AMENUSER",
 ]
 
 for table in tables:

@@ -1,6 +1,7 @@
 import sqlite3
 from typing import List
-from ..clients.model import ClientResponse
+from unittest import result
+from ..clients.model import ClientResponse, TierResponse
 
 def get_clients() -> List[ClientResponse]:
     """Fetch clients from the database."""
@@ -19,3 +20,23 @@ def get_clients() -> List[ClientResponse]:
         result.append(client)
 
     return result
+
+
+def get_tiers(customer_code: str) -> TierResponse:
+    """" Get tiers """
+    result = []
+
+    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    cursor = sqlite_conn.cursor()
+    cursor.execute(("""SELECT "BPRNUM_0", "BPCNAM_0" FROM BPARTNER 
+    JOIN BPCUSTOMER
+    ON BPCUSTOMER.BPCNUM_0 = BPARTNER.BPRNUM_0
+    WHERE BPCUSTOMER.BPCNUM_0  = ? """), (customer_code,))
+
+    row = cursor.fetchone()
+    tier = TierResponse(
+            code=row[0],
+            name=row[1]
+        )
+
+    return tier

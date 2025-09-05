@@ -1,6 +1,6 @@
 import sqlite3
 from typing import List
-from ..addresse.model import AddressInput, AddressRequest
+from ..addresse.model import AddressInput, AddressLivrasonREsponse, AddressRequest
 
 def get_adresse_vente() -> List[AddressRequest]:
     """  """
@@ -18,5 +18,24 @@ def get_adresse_vente() -> List[AddressRequest]:
         result.append(address)
 
     return result
-   
-    
+
+
+def get_adresse_livraison(code_clinet: str) -> List[AddressLivrasonREsponse]:
+    """Fetch delivery addresses from the database."""
+    result = []
+
+    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    cursor = sqlite_conn.cursor()
+    cursor.execute("""SELECT "BPAADD_0" FROM "BPDLVCUST"
+WHERE "BPCNUM_0" = ? """, (code_clinet,))
+
+    for row in cursor.fetchall():
+        address = AddressLivrasonREsponse(
+            code=row[0]
+        )
+        result.append(address)
+
+    return result 
+
+
+

@@ -4,3 +4,7 @@ class ClientResponse(BaseModel):
     code: str
     name: str
     cur: str
+
+class TierResponse(BaseModel):
+    code: str
+    name: str

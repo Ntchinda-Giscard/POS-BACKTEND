@@ -7,3 +7,6 @@ class AddressRequest(BaseModel):
 
 class AddressInput(BaseModel):
     site_id: str
+
+class AddressLivrasonREsponse(BaseModel):
+    code: str

@@ -5,6 +5,10 @@ class ClientResponse(BaseModel):
     name: str
     cur: str
 
+class ClientLivreResponse(BaseModel):
+    code: str
+
+
 class TierResponse(BaseModel):
     code: str
     name: str

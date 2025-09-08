@@ -1,7 +1,7 @@
 import sqlite3
 from typing import List
 from unittest import result
-from ..clients.model import ClientLivreResponse, ClientResponse, TierResponse
+from ..clients.model import ClientFactureResponse, ClientResponse, TierResponse
 
 def get_clients() -> List[ClientResponse]:
     """Fetch clients from the database."""
@@ -41,18 +41,17 @@ def get_tiers(customer_code: str) -> TierResponse:
 
     return tier
 
-def get_client_livre():
+def get_client_facture(code_client: str) -> ClientFactureResponse:
     """Fetch clients from the database."""
-    result = []
 
     sqlite_conn = sqlite3.connect("sagex3_seed.db")
     cursor = sqlite_conn.cursor()
-    cursor.execute("SELECT BPCNUM_0 FROM BPDLVCUST")
+    cursor.execute("SELECT BPCINV_0 FROM BPCUSTOMER WHERE BPCNUM_0 = ? ", ("C0001",))
 
-    for row in cursor.fetchall():
-        client = ClientLivreResponse(
-            code=row[0],
+    row = cursor.fetchone()
+    clientFacture = ClientFactureResponse(
+            code=row[0]
         )
-        result.append(client)
+        
 
-    return result
+    return clientFacture

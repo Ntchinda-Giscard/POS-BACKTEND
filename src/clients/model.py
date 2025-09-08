@@ -5,7 +5,7 @@ class ClientResponse(BaseModel):
     name: str
     cur: str
 
-class ClientLivreResponse(BaseModel):
+class ClientFactureResponse(BaseModel):
     code: str
 
 

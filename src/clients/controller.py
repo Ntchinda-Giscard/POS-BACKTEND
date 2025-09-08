@@ -1,6 +1,6 @@
 from typing import List
-from src.clients.serivce import get_clients, get_tiers
-from .model import ClientResponse, TierResponse
+from src.clients.serivce import get_client_livre, get_clients, get_tiers
+from .model import ClientLivreResponse, ClientResponse, TierResponse
 from fastapi import APIRouter
 
 router = APIRouter(
@@ -15,3 +15,7 @@ def read_clients():
 @router.get("/tiers/", response_model=TierResponse)
 def read_tiers(customer_code: str):
     return get_tiers(customer_code)
+
+@router.get("/livre/", response_model=List[ClientLivreResponse])
+def read_client_livre():
+    return get_client_livre()

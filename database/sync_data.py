@@ -50,6 +50,7 @@ tables = [
     "ABLOB",
     "AUTILIS",
     "AMENUSER",
+    "TABVAT"
 ]
 
 for table in tables:

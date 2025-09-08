@@ -26,7 +26,7 @@ def get_adresse_livraison(code_clinet: str) -> List[AddressLivrasonREsponse]:
 
     sqlite_conn = sqlite3.connect("sagex3_seed.db")
     cursor = sqlite_conn.cursor()
-    cursor.execute("""SELECT "BPAADD_0" FROM "BPDLVCUST"
+    cursor.execute("""SELECT "BPAADD_0" FROM "BPCUSTOMER"
 WHERE "BPCNUM_0" = ? """, (code_clinet,))
 
     for row in cursor.fetchall():

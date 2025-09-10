@@ -11,3 +11,4 @@ def get_payment_methode(customer_code: str) -> PayementMode:
     row = cursor.fetchone()
 
     return PayementMode(code= row[0])
+

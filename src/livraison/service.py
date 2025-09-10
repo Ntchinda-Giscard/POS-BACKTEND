@@ -24,7 +24,7 @@ def get_transporteur() -> List[TransPorteurResponse]:
 
     sqlite_conn = sqlite3.connect("sagex3_seed.db")
     cursor = sqlite_conn.cursor()
-    cursor.execute("SELECT BPTNUM_0, BPTNMAM_0 FROM BPCARRIER")
+    cursor.execute("SELECT BPTNUM_0, BPTNAM_0 FROM BPCARRIER")
 
     for row in cursor.fetchall():
         transporteur = TransPorteurResponse(

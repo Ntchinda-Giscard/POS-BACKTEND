@@ -13,7 +13,8 @@ def get_clients() -> List[ClientResponse]:
 SELECT
   BPCNUM_0,
   BPCNAM_0,
-  CUR_0
+  CUR_0,
+  IME_0
 FROM
   BPCUSTOMER
 ORDER BY
@@ -23,7 +24,8 @@ ORDER BY
         client = ClientResponse(
             code=row[0],
             name=row[1],
-            cur=row[2]
+            cur=row[2],
+            mode_fac=row[3]
         )
         result.append(client)
 

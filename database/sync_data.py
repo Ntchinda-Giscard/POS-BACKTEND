@@ -53,7 +53,8 @@ tables = [
     "TABVAT",
     "BPADDRESS",
     "WAREHOUSE",
-    "TABMODELIV"
+    "TABMODELIV",
+    "TABPAYTERM"
 ]
 
 for table in tables:

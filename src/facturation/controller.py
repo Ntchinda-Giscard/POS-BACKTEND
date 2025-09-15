@@ -17,7 +17,7 @@ def read_escompte(customer_code: str) -> Escomte:
 
     return get_escomte(customer_code)
 
-@router.get("/escomte", response_model=Escomte)
+@router.get("/condfac", response_model=Escomte)
 def read_cond_fac(customer_code: str) -> CondFacResponse:
 
     return get_cond_fac(customer_code)

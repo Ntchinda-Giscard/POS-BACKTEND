@@ -7,7 +7,7 @@ router = APIRouter(
     tags=["facture"]
 )
 
-@router.get("/payment-method", response_model=PayementMode)
+@router.get("/payment-condition", response_model=PayementMode)
 def read_payment_method(customer_code: str) -> PayementMode:
 
     return get_payment_methode(customer_code)

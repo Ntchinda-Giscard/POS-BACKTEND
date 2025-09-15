@@ -55,7 +55,7 @@ tables = [
     "WAREHOUSE",
     "TABMODELIV",
     "TABPAYTERM",
-    "TABDEPAGIO"
+    "TABDEPAGIO",
 ]
 
 for table in tables:

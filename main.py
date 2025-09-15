@@ -6,6 +6,7 @@ from src.clients.controller import router as clients_router
 from src.taxe.controller import router as taxe_router
 from src.currency.controller import router as currency_router
 from src.livraison.controller import router as livraison_router
+from src.facturation.controller import router as facture_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -25,6 +26,7 @@ app.include_router(clients_router)
 app.include_router(taxe_router)
 app.include_router(currency_router)
 app.include_router(livraison_router)
+app.include_router(facture_router)
 
 @app.get("/")
 def read_root():

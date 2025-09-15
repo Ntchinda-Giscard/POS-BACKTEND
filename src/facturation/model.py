@@ -5,3 +5,7 @@ class PayementMode(BaseModel):
 
 class Escomte(BaseModel):
     code: str
+
+
+class CondFacResponse(BaseModel):
+    code: str

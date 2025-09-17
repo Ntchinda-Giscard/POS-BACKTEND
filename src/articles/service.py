@@ -41,8 +41,8 @@ def get_articles_site(input: ArticleInput) -> List[ArticleRequest]:
             item_code=article[0],
             describtion=article[1],
             categorie= article[2],
-            stock=article[3] if article[3] is not None else 0.0,
-            base_price=article[4] if article[4] is not None else 0.0
+            stock=article[4] if article[4] is not None else 0.0,
+            base_price=article[3] if article[3] is not None else 0.0
         ))
     return results
 
@@ -67,7 +67,7 @@ FROM
   AND T1.STOFCY_0 = T2.STOFCY_0
   LEFT JOIN ITMMASTER AS T3 ON T1.ITMREF_0 = T3.ITMREF_0
 WHERE
-  T1.STOFCY_0 = 
+  T1.STOFCY_0 = ?
   AND UPPER(ITMDES1_0) LIKE UPPER(?)
 GROUP BY
   T1.ITMREF_0,
@@ -83,7 +83,7 @@ GROUP BY
             item_code=article[0],
             describtion=article[1],
             categorie= article[2],
-            stock=article[3] if article[3] is not None else 0.0,
-            base_price=article[4] if article[4] is not None else 0.0
+            stock=article[4] if article[4] is not None else 0.0,
+            base_price=article[3] if article[3] is not None else 0.0
         ))
     return results

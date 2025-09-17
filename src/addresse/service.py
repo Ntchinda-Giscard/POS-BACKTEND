@@ -8,12 +8,13 @@ def get_adresse_vente() -> List[AddressRequest]:
     
     sqlite_conn = sqlite3.connect("sagex3_seed.db")
     cursor = sqlite_conn.cursor()
-    cursor.execute("SELECT FCY_0, FCYNAM_0 FROM FACILITY ORDER BY FCY_0 ASC")
+    cursor.execute("SELECT FCY_0, FCYNAM_0, LEGCPY_0 FROM FACILITY ORDER BY FCY_0 ASC")
 
     for row in cursor.fetchall():
         address = AddressRequest(
             code=row[0],
-            description=row[1]
+            description=row[1],
+            leg_comp=row[2]
         )
         result.append(address)
 

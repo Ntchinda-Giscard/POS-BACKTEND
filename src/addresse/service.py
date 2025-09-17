@@ -37,5 +37,31 @@ def get_adresse_livraison(code_clinet: str) -> List[AddressLivrasonREsponse]:
 
     return result 
 
+def get_adresse_expedition(legacy_comp: str) -> List[AddressRequest]:
+    """  """
+    result = []
+    
+    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    cursor = sqlite_conn.cursor()
+    cursor.execute("""
+                   SELECT
+                        FCY_0,
+                    FCYNAM_0,
+                        LEGCPY_0
+                    FROM
+                        FACILITY
+                    WHERE
+                        LEGCPY_0 = ?
+                    ORDER BY
+                        FCY_0 ASC""", (legacy_comp,))
 
+    for row in cursor.fetchall():
+        address = AddressRequest(
+            code=row[0],
+            description=row[1],
+            leg_comp=row[2]
+        )
+        result.append(address)
+
+    return result
 

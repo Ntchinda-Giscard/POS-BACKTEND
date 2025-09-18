@@ -4,8 +4,7 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
-import json
-
+from ..pricing.model import PricingInput
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -1066,15 +1065,15 @@ class SageX3PricingEngine:
         return result
 
 # Utility functions for testing and demonstration
-def create_sample_context() -> PricingContext:
+def create_sample_context(input: PricingInput) -> PricingContext:
     """Create a sample pricing context for testing"""
     return PricingContext(
-        customer_code="FR004",
-        item_code="DIS007",
-        quantity=Decimal("10"),
-        currency="EUR",
-        unit_of_measure="UN",
-        order_date=datetime(2025, 9, 18)
+        customer_code= input.customer_code,
+        item_code= input.item_code,
+        quantity= Decimal(input.quantity),
+        currency= input.currency,
+        unit_of_measure= input.unit_of_measure,
+        order_date= input.order_date
     )
 
 def create_sample_context_with_fees() -> PricingContext:

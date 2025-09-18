@@ -28,6 +28,10 @@ class PricingContext:
         if self.order_date is None:
             self.order_date = datetime.now()
 
+
+
+
+
 @dataclass
 class PriceAdjustment:
     """Represents a single price adjustment (discount or fee) with complete Sage X3 semantics"""
@@ -1066,8 +1070,8 @@ def create_sample_context() -> PricingContext:
     """Create a sample pricing context for testing"""
     return PricingContext(
         customer_code="FR004",
-        item_code="DIS009",
-        quantity=Decimal("5"),
+        item_code="DIS007",
+        quantity=Decimal("10"),
         currency="EUR",
         unit_of_measure="UN",
         order_date=datetime(2025, 9, 18)

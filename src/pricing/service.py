@@ -51,7 +51,7 @@ class PricingResult:
     """Result object containing calculated pricing information"""
     unit_price: Decimal = Decimal('0')
     base_price: Decimal = Decimal('0')  # Price before adjustments
-    adjustments: List[PriceAdjustment] = None  # All adjustments (discounts + fees)
+    adjustments: List[PriceAdjustment] = None  # type: ignore # All adjustments (discounts + fees)
     free_items: List[Dict[str, Any]] = None
     commission_coefficient: Decimal = Decimal('1')
     pricing_rule_code: str = ''
@@ -1155,8 +1155,24 @@ def test_pricing_engine_complete(db_path: str):
     with SageX3PricingEngine(db_path) as engine:
         # Test multiple contexts
         contexts = [
-            ("Standard Context (150 units)", create_sample_context()),
-            # ("Context with Fees (175 units)", create_sample_context_with_fees())
+            ("Standard Context (150 units)", create_sample_context( 
+                input= PricingInput(
+                    customer_code='FR004',
+                    item_code='DIS009',
+                    quantity='5',
+                    currency='EUR',
+                    unit_of_measure='UN'
+                )
+             )),
+            ("Standard Context (150 units)", create_sample_context( 
+                input= PricingInput(
+                    customer_code='FR004',
+                    item_code='DIS007',
+                    quantity='1',
+                    currency='EUR',
+                    unit_of_measure='UN'
+                )
+             )),
         ]
         
         for context_name, context in contexts:

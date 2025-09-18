@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
-from ..pricing.model import PricingInput
+from ..pricing.model import PricingInput, PricingOutput
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -1143,7 +1143,7 @@ def test_calculation_types():
     print(f"- Cascade: 100 - 10 - 5 = {price_cascade} EUR")
     print(f"- Différence: {price_cumulative - price_cascade} EUR")
 
-def test_pricing_engine_complete():
+def test_pricing_engine_complete() -> PricingOutput:
     """
     Complete test of the Sage X3 pricing engine showing the full breakdown
     
@@ -1161,15 +1161,6 @@ def test_pricing_engine_complete():
                     customer_code='FR004',
                     item_code='DIS009',
                     quantity='5',
-                    currency='EUR',
-                    unit_of_measure='UN'
-                )
-             )),
-            ("Standard Context (150 units)", create_sample_context( 
-                input= PricingInput(
-                    customer_code='FR004',
-                    item_code='DIS007',
-                    quantity='1',
                     currency='EUR',
                     unit_of_measure='UN'
                 )

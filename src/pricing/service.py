@@ -52,7 +52,7 @@ class PricingResult:
     unit_price: Decimal = Decimal('0')
     base_price: Decimal = Decimal('0')  # Price before adjustments
     adjustments: List[PriceAdjustment] = None  # type: ignore # All adjustments (discounts + fees)
-    free_items: List[Dict[str, Any]] = None
+    free_items: List[Dict[str, Any]] = None # type: ignore
     commission_coefficient: Decimal = Decimal('1')
     pricing_rule_code: str = ''
     reason_code: str = ''
@@ -145,7 +145,7 @@ class SageX3PricingEngine:
         if structure_code in self._price_structures_cache:
             return self._price_structures_cache[structure_code]
         
-        cursor = self.connection.cursor()
+        cursor = self.connection.cursor() # type: ignore
         
         # Query to get the price structure configuration
         query = """
@@ -198,7 +198,7 @@ class SageX3PricingEngine:
         Returns:
             List of pricing configuration dictionaries
         """
-        cursor = self.connection.cursor()
+        cursor = self.connection.cursor() # type: ignore
         
         query = """
         SELECT * FROM SPRICCONF 
@@ -264,7 +264,7 @@ class SageX3PricingEngine:
         Returns:
             List of applicable pricing line dictionaries
         """
-        cursor = self.connection.cursor()
+        cursor = self.connection.cursor() # type: ignore
         
         # Build criteria for matching
         criteria = self.build_pricing_criteria(context, config)
@@ -371,7 +371,7 @@ class SageX3PricingEngine:
         Returns:
             Base price as Decimal
         """
-        cursor = self.connection.cursor()
+        cursor = self.connection.cursor() # type: ignore
         
         query = "SELECT BASPRI_0 FROM ITMMASTER WHERE ITMREF_0 = ?"
         cursor.execute(query, (item_code,))
@@ -484,7 +484,7 @@ class SageX3PricingEngine:
         Returns:
             List of free item dictionaries
         """
-        cursor = self.connection.cursor()
+        cursor = self.connection.cursor() # type: ignore
 
         query = f"""SELECT FOCPRO_0, FOCTYP_0 FROM SPRICCONF WHERE PLI_0 = ?"""
         cursor.execute(query, (line.get('PLI_0'),))
@@ -1145,7 +1145,7 @@ def test_calculation_types():
     print(f"- Cascade: 100 - 10 - 5 = {price_cascade} EUR")
     print(f"- Différence: {price_cumulative - price_cascade} EUR")
 
-def test_pricing_engine_complete(inputs: PricingInput) -> PricingOutput:
+def test_pricing_engine_complete(input_contexts: List[PricingInput]) -> List[PricingOutput]:
     """
     Complete test of the Sage X3 pricing engine showing the full breakdown
     
@@ -1157,17 +1157,19 @@ def test_pricing_engine_complete(inputs: PricingInput) -> PricingOutput:
     
     with SageX3PricingEngine(db_path) as engine:
         # Test multiple contexts
+        output_result = []
         contexts = [
             ("Standard Context (150 units)", create_sample_context( 
                 input= PricingInput(
-                    customer_code=inputs.customer_code,
-                    item_code=inputs.item_code,
-                    quantity=inputs.quantity,
-                    currency=inputs.currency,
-                    unit_of_measure=inputs.unit_of_measure
+                    customer_code=input_context.customer_code,
+                    item_code=input_context.item_code,
+                    quantity=input_context.quantity,
+                    currency=input_context.currency,
+                    unit_of_measure=input_context.unit_of_measure
                 )
-             )),
+             )) for input_context in input_contexts
         ]
+
         
         for context_name, context in contexts:
             print(f"\n{'='*60}")
@@ -1285,11 +1287,13 @@ def test_pricing_engine_complete(inputs: PricingInput) -> PricingOutput:
                 print(f"- Additional charge percentage: {charge_percent.quantize(Decimal('0.01'))}%")
             
             print(f"\n{'='*60}\n")
-        return PricingOutput(
-            prix_brut=float(Decimal(line_total_before) / Decimal(inputs.quantity)),
-            prix_net= float(Decimal(line_total_after) / Decimal(inputs.quantity)),
-            total_HT=float(line_total_after)
-        )
+            output_result.append(PricingOutput(
+            prix_brut=float(Decimal(line_total_before) / Decimal(context.quantity)),
+            prix_net= float(Decimal(line_total_after) / Decimal(context.quantity)),
+            total_HT=float(line_total_after),
+            gratuit= result.free_items # type: ignore
+        ))
+        return output_result
 
 def explain_sage_x3_pricing_structure():
     """

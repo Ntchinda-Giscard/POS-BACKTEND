@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -15,6 +15,5 @@ class PricingInput(BaseModel):
 class PricingOutput(BaseModel):
     prix_brut: float
     prix_net: float
-    gratuit: Optional[str]=None
-    qty_grat: Optional[str]=None
+    gratuit: Optional[List[Dict[str, Any]]]=None
     total_HT: float

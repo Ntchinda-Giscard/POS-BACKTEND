@@ -9,8 +9,8 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=PricingOutput)
-def get_pricing(input: List[PricingInput]) -> PricingOutput:
+@router.post("/", response_model=List[PricingOutput])
+def get_pricing(input: List[PricingInput]) -> List[PricingOutput]:
 
     result = test_pricing_engine_complete(input)
 

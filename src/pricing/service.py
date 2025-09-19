@@ -886,6 +886,8 @@ class SageX3PricingEngine:
         print(f"Quantity: {context.quantity}")
         print(f"Original line total: {original_line_total} {context.currency}")
         print(f"Processing {len(sorted_adjustments)} adjustments in order:\n")
+
+        
         
         logger.debug(f"Applying {len(sorted_adjustments)} adjustments to base price: {base_price}")
         logger.debug(f"Quantity: {context.quantity}, Original line total: {original_line_total}")
@@ -1143,7 +1145,7 @@ def test_calculation_types():
     print(f"- Cascade: 100 - 10 - 5 = {price_cascade} EUR")
     print(f"- Différence: {price_cumulative - price_cascade} EUR")
 
-def test_pricing_engine_complete() -> PricingOutput:
+def test_pricing_engine_complete(inputs: PricingInput) -> PricingOutput:
     """
     Complete test of the Sage X3 pricing engine showing the full breakdown
     
@@ -1158,11 +1160,11 @@ def test_pricing_engine_complete() -> PricingOutput:
         contexts = [
             ("Standard Context (150 units)", create_sample_context( 
                 input= PricingInput(
-                    customer_code='FR004',
-                    item_code='DIS009',
-                    quantity='5',
-                    currency='EUR',
-                    unit_of_measure='UN'
+                    customer_code=inputs.customer_code,
+                    item_code=inputs.item_code,
+                    quantity=inputs.quantity,
+                    currency=inputs.currency,
+                    unit_of_measure=inputs.unit_of_measure
                 )
              )),
         ]
@@ -1283,6 +1285,11 @@ def test_pricing_engine_complete() -> PricingOutput:
                 print(f"- Additional charge percentage: {charge_percent.quantize(Decimal('0.01'))}%")
             
             print(f"\n{'='*60}\n")
+        return PricingOutput(
+            prix_brut=float(Decimal(line_total_before) / Decimal(inputs.quantity)),
+            prix_net= float(Decimal(line_total_after) / Decimal(inputs.quantity)),
+            total_HT=float(line_total_after)
+        )
 
 def explain_sage_x3_pricing_structure():
     """

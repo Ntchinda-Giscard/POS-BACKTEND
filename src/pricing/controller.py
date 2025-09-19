@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from src.pricing.service import test_pricing_engine_complete
-from .model import PricingInput
+from .model import PricingInput, PricingOutput
 
 router = APIRouter(
     prefix="/pricing",
@@ -8,7 +8,9 @@ router = APIRouter(
 )
 
 
-@router.post("/")
-def get_pricing(input: PricingInput) -> None:
+@router.post("/", response_model=PricingOutput)
+def get_pricing(input: PricingInput) -> PricingOutput:
 
-    test_pricing_engine_complete()
+    result = test_pricing_engine_complete(input)
+
+    return result

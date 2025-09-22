@@ -1,6 +1,7 @@
 
 
 import sqlite3
+from typing import Dict
 
 
 class DeterminationTaxe:
@@ -42,7 +43,7 @@ class DeterminationTaxe:
         except Exception as e:
             return {'erreur': str(e)}
     
-    def _valider_donnees_entree(self, donnees):
+    def _valider_donnees_entree(self, donnees: Dict):
         """
         Validation des données d'entrée obligatoires
         """
@@ -71,13 +72,13 @@ class DeterminationTaxe:
         
         # Ajout des critères optionnels
         if donnees.get('legislation'):
-            criteres['LEG'] = donnees['legislation']
+            criteres['LEG_0'] = donnees['legislation']
         
         if donnees.get('groupe_societe'):
-            criteres['GRP'] = donnees['groupe_societe']
+            criteres['GRP_0'] = donnees['groupe_societe']
         
         if donnees.get('type_taxe'):
-            criteres['VATTYP'] = donnees['type_taxe']
+            criteres['VATTYP_0'] = donnees['type_taxe']
         
         return criteres
     
@@ -115,11 +116,11 @@ class DeterminationTaxe:
         Vérification de la cohérence entre législation et groupe de sociétés
         """
         # Si pas de groupe défini, pas de contrôle nécessaire
-        if not regle.get('GRP'):
+        if not regle.get('GRP_0'):
             return True
         
         # Si pas de législation définie, pas de contrôle nécessaire
-        if not regle.get('LEG'):
+        if not regle.get('LEG_0'):
             return True
         
         # Ici, on devrait vérifier que le groupe contient au moins
@@ -187,7 +188,7 @@ resultat = determinateur.determiner_code_taxe({
     'regime_taxe_tiers': 'FRA',
     'niveau_taxe_article': 'NOR',
     'legislation': 'FRA',
-    'groupe_societe': 'GRP001'
+    'groupe_societe': 'FR01'
 })
 
 

@@ -60,7 +60,8 @@ tables = [
     "BPCINVVAT",
     "TABVAT",
     "TABRATVAT",
-    "TABVACITM"
+    "TABVACITM",
+    "TABVAC"
 ]
 
 for table in tables:

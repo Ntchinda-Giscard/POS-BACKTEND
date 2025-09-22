@@ -18,6 +18,7 @@ def get_articles_site(input: ArticleInput) -> List[ArticleRequest]:
     T3.ITMDES1_0,
     T4.TCLCOD_0,
     T3.BASPRI_0,
+                          T4.SAU_0,
     SUM(T2.QTYSTUACT_0) AS StockActif
     FROM
         ITMFACILIT AS T1
@@ -33,7 +34,8 @@ def get_articles_site(input: ArticleInput) -> List[ArticleRequest]:
         T1.ITMREF_0,
         T3.ITMDES1_0,
         T4.TCLCOD_0,
-        T3.BASPRI_0
+        T3.BASPRI_0,
+                          T4.SAU_0
 
         """, (input.site_id,))
     articles = sqlite_cursor.fetchall()
@@ -43,8 +45,9 @@ def get_articles_site(input: ArticleInput) -> List[ArticleRequest]:
             item_code=article[0],
             describtion=article[1] if article[1] is not None else "" ,
             categorie= article[2],
-            stock=article[4] if article[4] is not None else 0.0,
-            base_price=article[3] if article[3] is not None else 0.0
+            base_price=article[3] if article[3] is not None else 0.0,
+            unit_sales=article[4] if article[4] is not None else "",
+            stock=article[5] if article[5] is not None else 0.0,
         ))
     return results
 
@@ -62,6 +65,7 @@ def search_article(site_id: str, q: str) -> List[ArticleRequest]:
   T3.ITMDES1_0,
   T3.TCLCOD_0,
   T3.PURBASPRI_0,
+                          T4.SAU_0,
   SUM(T2.QTYSTUACT_0) AS StockActif
 FROM
   ITMFACILIT AS T1
@@ -75,7 +79,8 @@ GROUP BY
   T1.ITMREF_0,
   T3.ITMDES1_0,
   T3.TCLCOD_0,
-  T3.PURBASPRI_0
+  T3.PURBASPRI_0,
+                          T4.SAU_0
 
         """, (site_id, q))
     articles = sqlite_cursor.fetchall()
@@ -85,7 +90,8 @@ GROUP BY
             item_code=article[0],
             describtion=article[1] if article[1] is not None else "" ,
             categorie= article[2],
-            stock=article[4] if article[4] is not None else 0.0,
-            base_price=article[3] if article[3] is not None else 0.0
+            base_price=article[3] if article[3] is not None else 0.0,
+            unit_sales=article[4] if article[4] is not None else "",
+            stock=article[5] if article[5] is not None else 0.0,
         ))
     return results

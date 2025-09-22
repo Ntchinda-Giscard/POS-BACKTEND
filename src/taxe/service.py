@@ -11,11 +11,11 @@ def get_regime_taxe(customer_code: str) -> TaxeResponse:
     cursor = sqlite3_conn.cursor() 
     cursor.execute("""
         SELECT
-            "VACBPR_0"
+            VACBPR_0
         FROM
-            "BPCUSTOMER"
+            BPCUSTOMER
         WHERE
-            "BPCNUM_0" = ?
+            BPCNUM_0 = ?
                    """, (customer_code,))
     code = cursor.fetchone()[0]
     cursor.close()

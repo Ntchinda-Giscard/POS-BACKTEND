@@ -1288,6 +1288,7 @@ def test_pricing_engine_complete(input_contexts: List[PricingInput]) -> List[Pri
             
             print(f"\n{'='*60}\n")
             output_result.append(PricingOutput(
+                item_code=context.item_code,
             prix_brut=float(Decimal(line_total_before) / Decimal(context.quantity)),
             prix_net= float(Decimal(line_total_after) / Decimal(context.quantity)),
             total_HT=float(line_total_after),

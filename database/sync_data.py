@@ -56,6 +56,11 @@ tables = [
     "TABMODELIV",
     "TABPAYTERM",
     "TABDEPAGIO",
+    "TABVACBPR",
+    "BPCINVVAT",
+    "TABVAT",
+    "TABRATVAT",
+    "TABVACITM"
 ]
 
 for table in tables:

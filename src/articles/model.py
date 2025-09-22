@@ -4,6 +4,7 @@ from pydantic import BaseModel
 class ArticleRequest(BaseModel):
     item_code: str
     describtion: str
+    unit_sales: str
     stock: Optional[float] = 0.0
     categorie: Optional[str] = None
     base_price: Optional[float] = None

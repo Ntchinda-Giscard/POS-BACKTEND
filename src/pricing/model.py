@@ -13,6 +13,7 @@ class PricingInput(BaseModel):
 
 
 class PricingOutput(BaseModel):
+    item_code: str
     prix_brut: float
     prix_net: float
     gratuit: Optional[List[Dict[str, Any]]]=None

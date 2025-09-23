@@ -56,7 +56,6 @@ tables = [
     "TABMODELIV",
     "TABPAYTERM",
     "TABDEPAGIO",
-    "TABVACBPR",
     "BPCINVVAT",
     "TABVAT",
     "TABRATVAT",

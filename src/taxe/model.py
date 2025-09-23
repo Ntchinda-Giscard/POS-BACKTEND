@@ -13,6 +13,7 @@ class AppliedTaxResponse(BaseModel):
 
 
 class AppliedTaxInput(BaseModel):
+    item_code: str
     regime_taxe_tiers: str
     niveau_taxe_article: str
     legislation: Optional[str] = None

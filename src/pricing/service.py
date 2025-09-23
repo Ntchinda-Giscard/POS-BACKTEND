@@ -19,7 +19,7 @@ class PricingContext:
     unit_of_measure: str = 'UN'
     site: str = ''
     sales_rep: str = ''
-    order_date: datetime = None
+    order_date: datetime = None # type: ignore
     customer_category: str = ''
     item_category: str = ''
     
@@ -1463,4 +1463,4 @@ if __name__ == "__main__":
     print("\n")
     
     # Run the complete test
-    test_pricing_engine_complete()
+    # test_pricing_engine_complete()

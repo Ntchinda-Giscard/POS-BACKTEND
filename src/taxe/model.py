@@ -17,6 +17,5 @@ class AppliedTaxInput(BaseModel):
     item_code: str
     regime_taxe_tiers: str
     # niveau_taxe_article: str
-    legislation: Optional[str] = None
     groupe_societe: Optional[str] = None
     type_taxe: Optional[str] = None

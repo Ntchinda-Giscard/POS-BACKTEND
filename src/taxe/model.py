@@ -6,6 +6,7 @@ class TaxeResponse(BaseModel):
 
 
 class AppliedTaxResponse(BaseModel):
+    item_code: str
     code_taxe: str
     taux: float
     compte_comptable: Optional[str] = None
@@ -15,7 +16,7 @@ class AppliedTaxResponse(BaseModel):
 class AppliedTaxInput(BaseModel):
     item_code: str
     regime_taxe_tiers: str
-    niveau_taxe_article: str
+    # niveau_taxe_article: str
     legislation: Optional[str] = None
     groupe_societe: Optional[str] = None
     type_taxe: Optional[str] = None

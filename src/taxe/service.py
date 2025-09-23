@@ -51,7 +51,7 @@ def get_legislation(regime_taxe_tiers: str) -> str:
         FROM
             TABVACBPR
         WHERE
-            COD_0 = ?
+            VACBPR_0 = ?
                    """, (regime_taxe_tiers,))
     legislation = cursor.fetchone()[0]
     cursor.close()

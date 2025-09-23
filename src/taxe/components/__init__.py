@@ -1,7 +1,4 @@
-
-
 import sqlite3
-from typing import Dict
 
 
 class DeterminationTaxe:
@@ -43,7 +40,7 @@ class DeterminationTaxe:
         except Exception as e:
             return {'erreur': str(e)}
     
-    def _valider_donnees_entree(self, donnees: Dict):
+    def _valider_donnees_entree(self, donnees):
         """
         Validation des données d'entrée obligatoires
         """
@@ -67,7 +64,7 @@ class DeterminationTaxe:
         criteres = {
             'VACBPR_0': donnees['regime_taxe_tiers'],
             'VACITM_0': donnees['niveau_taxe_article'],
-            'ENAFLG_0': 2  # Seulement les règles actives
+            'ENAFLG_0': True  # Seulement les règles actives
         }
         
         # Ajout des critères optionnels
@@ -99,10 +96,14 @@ class DeterminationTaxe:
     
     def _valider_criteres_additionnels(self, regle, contexte):
         """
-        Validation des critères supplémentaires
+        Validation des critères supplémentaires incluant TAXLINK
         """
         # Vérification de la cohérence législation/groupe
         if not self._verifier_coherence_legislation_groupe(regle):
+            return False
+        
+        # Vérification des critères TAXLINK
+        if not self._valider_criteres_taxlink(regle, contexte):
             return False
         
         # Vérification des critères métier spécifiques
@@ -111,16 +112,78 @@ class DeterminationTaxe:
         
         return True
     
+    def _valider_criteres_taxlink(self, regle, contexte):
+        """
+        Validation des critères complémentaires de la table TAXLINK
+        """
+        # Récupération des critères TAXLINK pour cette règle
+        criteres_taxlink = self._recuperer_criteres_taxlink(regle.get('COD'))
+        
+        if not criteres_taxlink:
+            return True  # Pas de critères supplémentaires
+        
+        # Validation de chaque critère TAXLINK
+        for critere in criteres_taxlink:
+            if not self._evaluer_critere_taxlink(critere, contexte):
+                return False
+        
+        return True
+    
+    def _recuperer_criteres_taxlink(self, code_determination):
+        """
+        Récupération des critères TAXLINK pour un code de détermination donné
+        """
+        query = """
+        SELECT * FROM TAXLINK 
+        WHERE CLE = :code_determination
+        ORDER BY LIGNE
+        """
+        
+        return self.db.execute(query, {'code_determination': code_determination}).fetchall()
+    
+    def _evaluer_critere_taxlink(self, critere, contexte):
+        """
+        Évaluation d'un critère TAXLINK individuel
+        """
+        champ = critere.get('CHAMP')
+        operateur = critere.get('OPERATEUR', '=')
+        valeur_attendue = critere.get('VALEUR')
+        valeur_contexte = contexte.get(champ)
+        
+        if not champ or valeur_attendue is None:
+            return True
+        
+        # Évaluation selon l'opérateur
+        if operateur == '=':
+            return valeur_contexte == valeur_attendue
+        elif operateur == '!=':
+            return valeur_contexte != valeur_attendue
+        elif operateur == '>':
+            return valeur_contexte and valeur_contexte > valeur_attendue
+        elif operateur == '<':
+            return valeur_contexte and valeur_contexte < valeur_attendue
+        elif operateur == '>=':
+            return valeur_contexte and valeur_contexte >= valeur_attendue
+        elif operateur == '<=':
+            return valeur_contexte and valeur_contexte <= valeur_attendue
+        elif operateur == 'LIKE':
+            return valeur_contexte and valeur_attendue in valeur_contexte
+        elif operateur == 'IN':
+            liste_valeurs = valeur_attendue.split(',')
+            return valeur_contexte in liste_valeurs
+        
+        return True
+    
     def _verifier_coherence_legislation_groupe(self, regle):
         """
         Vérification de la cohérence entre législation et groupe de sociétés
         """
         # Si pas de groupe défini, pas de contrôle nécessaire
-        if not regle.get('GRP_0'):
+        if not regle.get('GRP'):
             return True
         
         # Si pas de législation définie, pas de contrôle nécessaire
-        if not regle.get('LEG_0'):
+        if not regle.get('LEG'):
             return True
         
         # Ici, on devrait vérifier que le groupe contient au moins
@@ -178,22 +241,16 @@ class DeterminationTaxe:
         
         return self.db.execute(query, {'code_taxe': code_taxe}).fetchone()
 
-
-
+# Utilisation
 sqlite_conn = sqlite3.connect("sagex3_seed.db")
 cursor = sqlite_conn.cursor()
-# Utilisation
 determinateur = DeterminationTaxe(cursor)
 resultat = determinateur.determiner_code_taxe({
     'regime_taxe_tiers': 'FRA',
     'niveau_taxe_article': 'NOR',
     'legislation': 'FRA',
-    'groupe_societe': 'FR01'
+    'groupe_societe': 'GRP001'
 })
 
-
-
-
-
-print(f"Code taxe: {resultat['code_taxe']}")
-print(f"Taux: {resultat['taux']}%")
+print(f"Code taxe: {resultat}")
+print(f"Taux: {resultat}%")

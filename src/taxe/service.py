@@ -23,6 +23,24 @@ def get_regime_taxe(customer_code: str) -> TaxeResponse:
     cursor.close()
     return TaxeResponse(code=code)
 
+def get_niveau_taxe_article(item_code: str) -> str:
+    """Fetch tax level from the database."""
+    # Simulated database fetch
+    sqlite3_conn = sqlite3.connect("sagex3_seed.db")
+    cursor = sqlite3_conn.cursor() 
+    cursor.execute("""
+        SELECT
+            VACITM_0
+        FROM
+            ITMMASTER
+        WHERE
+            ITMREF_0 = ?
+                   """, (item_code,))
+    niveau = cursor.fetchone()[0]
+    cursor.close()
+    return niveau
+
+
 def get_applied_tax(criterias: List[AppliedTaxInput]) -> List[AppliedTaxResponse]:
     """Determine the applicable tax based on criteria."""
     from .components import DeterminationTaxe
@@ -33,9 +51,10 @@ def get_applied_tax(criterias: List[AppliedTaxInput]) -> List[AppliedTaxResponse
     cursor = sqlite_conn.cursor()
     determinateur = DeterminationTaxe(cursor)
     for criteria in criterias:
+        niveau_taxe_article = get_niveau_taxe_article(criteria.item_code)
         code_taxe = determinateur.determiner_code_taxe({
             'regime_taxe_tiers':  criteria.regime_taxe_tiers,
-            'niveau_taxe_article': criteria.niveau_taxe_article,
+            'niveau_taxe_article': niveau_taxe_article,
             'legislation': criteria.legislation,
             'groupe_societe': criteria.groupe_societe
         })
@@ -43,6 +62,7 @@ def get_applied_tax(criterias: List[AppliedTaxInput]) -> List[AppliedTaxResponse
             raise Exception("Aucun code taxe trouvé pour ces critères")
         results.append(
             AppliedTaxResponse(
+                item_code=criteria.item_code,
         code_taxe=code_taxe.get('code_taxe', ''),
         taux= code_taxe.get('taux', 0.0) if code_taxe.get('taux', 0.0) else 0.0, # type: ignore
     )

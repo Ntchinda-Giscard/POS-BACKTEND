@@ -40,6 +40,22 @@ def get_niveau_taxe_article(item_code: str) -> str:
     cursor.close()
     return niveau
 
+def get_legislation(regime_taxe_tiers: str) -> str:
+    """Fetch legislation from the database."""
+    # Simulated database fetch
+    sqlite3_conn = sqlite3.connect("sagex3_seed.db")
+    cursor = sqlite3_conn.cursor() 
+    cursor.execute("""
+        SELECT
+            LEG_0
+        FROM
+            TABVACBPR
+        WHERE
+            COD_0 = ?
+                   """, (regime_taxe_tiers,))
+    legislation = cursor.fetchone()[0]
+    cursor.close()
+    return legislation
 
 def get_applied_tax(criterias: List[AppliedTaxInput]) -> List[AppliedTaxResponse]:
     """Determine the applicable tax based on criteria."""
@@ -52,10 +68,11 @@ def get_applied_tax(criterias: List[AppliedTaxInput]) -> List[AppliedTaxResponse
     determinateur = DeterminationTaxe(cursor)
     for criteria in criterias:
         niveau_taxe_article = get_niveau_taxe_article(criteria.item_code)
+        legislation = get_legislation(criteria.regime_taxe_tiers)
         code_taxe = determinateur.determiner_code_taxe({
             'regime_taxe_tiers':  criteria.regime_taxe_tiers,
             'niveau_taxe_article': niveau_taxe_article,
-            'legislation': criteria.legislation,
+            'legislation': legislation,
             'groupe_societe': criteria.groupe_societe
         })
         if not code_taxe:

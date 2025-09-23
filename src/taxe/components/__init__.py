@@ -251,20 +251,21 @@ class DeterminationTaxe:
         STRDAT_0 DESC
         """
 
+        print(f"Exécution de la requête pour récupérer les détails du code taxe avec code_taxe={code_taxe}")
         
         
         return self.db.execute(query, {'code_taxe': code_taxe}).fetchone()
 
 # Utilisation
-sqlite_conn = sqlite3.connect("sagex3_seed.db")
-cursor = sqlite_conn.cursor()
-determinateur = DeterminationTaxe(cursor)
-resultat = determinateur.determiner_code_taxe({
-    'regime_taxe_tiers': 'FRA',
-    'niveau_taxe_article': 'NOR',
-    'legislation': 'FRA',
-    'groupe_societe': 'FR01'
-})
+# sqlite_conn = sqlite3.connect("sagex3_seed.db")
+# cursor = sqlite_conn.cursor()
+# determinateur = DeterminationTaxe(cursor)
+# resultat = determinateur.determiner_code_taxe({
+#     'regime_taxe_tiers': 'FRA',
+#     'niveau_taxe_article': 'NOR',
+#     'legislation': 'FRA',
+#     'groupe_societe': 'FR01'
+# })
 
-print(f"Code taxe: {resultat['code_taxe']}")
-print(f"Taux: {resultat['taux']}%")
+# print(f"Code taxe: {resultat['code_taxe']}")
+# print(f"Taux: {resultat['taux']}%")

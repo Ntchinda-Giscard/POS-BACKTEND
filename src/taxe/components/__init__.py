@@ -34,9 +34,9 @@ class DeterminationTaxe:
                 print(f"Détails du code taxe: {details_taxe}")
                 return {
                     'code_taxe': code_taxe,
-                    'taux': details_taxe.get('taux', 0),
-                    'compte_comptable': details_taxe.get('compte', ''),
-                    'exonere': details_taxe.get('exonere', False)
+                    'taux': details_taxe[0] if details_taxe else 0.0,
+                    # 'compte_comptable': details_taxe.get('compte', ''),
+                    # 'exonere': details_taxe.get('exonere', False)
                 }
             else:
                 raise Exception("Aucun code taxe trouvé pour ces critères")
@@ -91,10 +91,12 @@ class DeterminationTaxe:
             return None
         
         for regle in regles:
+            print(f"Vérification de la règle: {regle}")
             # Vérification des critères additionnels
-            if self._valider_criteres_additionnels(regle, donnees_contexte):
+            # if self._valider_criteres_additionnels(regle, donnees_contexte):
+                
                 # Retourne le code taxe de la première règle valide
-                return regle.get('CODE_TAXE') or regle.get('CODTAXE')
+            return regle[39] or regle[39].strip()  # Supposant que le code taxe est à l'index 39
         
         return None
     
@@ -121,7 +123,7 @@ class DeterminationTaxe:
         Validation des critères complémentaires de la table TAXLINK
         """
         # Récupération des critères TAXLINK pour cette règle
-        criteres_taxlink = self._recuperer_criteres_taxlink(regle.get('COD'))
+        criteres_taxlink = self._recuperer_criteres_taxlink(regle['COD_0'])
         
         if not criteres_taxlink:
             return True  # Pas de critères supplémentaires
@@ -183,11 +185,11 @@ class DeterminationTaxe:
         Vérification de la cohérence entre législation et groupe de sociétés
         """
         # Si pas de groupe défini, pas de contrôle nécessaire
-        if not regle.get('GRP_0'):
+        if not regle['GRP_0']:
             return True
         
         # Si pas de législation définie, pas de contrôle nécessaire
-        if not regle.get('LEG_0'):
+        if not regle['LEG_0']:
             return True
         
         # Ici, on devrait vérifier que le groupe contient au moins
@@ -239,9 +241,17 @@ class DeterminationTaxe:
         Récupération des détails depuis TABVAT
         """
         query = """
-        SELECT * FROM TABVAT 
-        WHERE CODE = :code_taxe
+        SELECT
+        VATRAT_0
+        FROM
+        TABRATVAT
+        WHERE
+        VAT_0 = :code_taxe
+        ORDER BY
+        STRDAT_0 DESC
         """
+
+        
         
         return self.db.execute(query, {'code_taxe': code_taxe}).fetchone()
 
@@ -256,5 +266,5 @@ resultat = determinateur.determiner_code_taxe({
     'groupe_societe': 'FR01'
 })
 
-print(f"Code taxe: {resultat}")
-print(f"Taux: {resultat}%")
+print(f"Code taxe: {resultat['code_taxe']}")
+print(f"Taux: {resultat['taux']}%")

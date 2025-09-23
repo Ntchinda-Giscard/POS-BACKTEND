@@ -14,7 +14,7 @@ def read_regime_taxe(customer_code: str):
     return get_regime_taxe(customer_code)
 
 
-@router.post("/applied", response_model=List[AppliedTaxResponse])
+@router.post("/applied/", response_model=List[AppliedTaxResponse])
 def get_taxe_code(criterias: List[AppliedTaxInput]):
 
     return get_applied_tax(criterias)

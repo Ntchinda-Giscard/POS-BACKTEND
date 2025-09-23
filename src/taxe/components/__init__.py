@@ -1,4 +1,5 @@
 import sqlite3
+from typing import Dict
 
 
 class DeterminationTaxe:
@@ -12,22 +13,25 @@ class DeterminationTaxe:
         """
         try:
             # 1. Validation des données d'entrée
-            self._valider_donnees_entree(donnees_vente)
+            print(self._valider_donnees_entree(donnees_vente))
             
             # 2. Construction des critères de recherche
             criteres = self._construire_criteres(donnees_vente)
-            
+            print(f"Critères construits: {criteres}")
+
             # 3. Recherche des règles applicables
             regles = self._rechercher_regles_applicables(criteres)
-            
+            print(f"Règles trouvées: {regles}")
             # 4. Application de la première règle valide
             code_taxe = self._appliquer_premiere_regle_valide(
                 regles, donnees_vente
             )
+            print(f"Code taxe déterminé: {code_taxe}")
             
             # 5. Récupération des détails du code taxe
             if code_taxe:
                 details_taxe = self._recuperer_details_taxe(code_taxe)
+                print(f"Détails du code taxe: {details_taxe}")
                 return {
                     'code_taxe': code_taxe,
                     'taux': details_taxe.get('taux', 0),
@@ -64,7 +68,7 @@ class DeterminationTaxe:
         criteres = {
             'VACBPR_0': donnees['regime_taxe_tiers'],
             'VACITM_0': donnees['niveau_taxe_article'],
-            'ENAFLG_0': True  # Seulement les règles actives
+            'ENAFLG_0': 2  # Seulement les règles actives
         }
         
         # Ajout des critères optionnels
@@ -135,7 +139,7 @@ class DeterminationTaxe:
         """
         query = """
         SELECT * FROM TAXLINK 
-        WHERE CLE = :code_determination
+        WHERE CLE_0 = :code_determination
         ORDER BY LIGNE
         """
         
@@ -174,16 +178,16 @@ class DeterminationTaxe:
         
         return True
     
-    def _verifier_coherence_legislation_groupe(self, regle):
+    def _verifier_coherence_legislation_groupe(self, regle: Dict):
         """
         Vérification de la cohérence entre législation et groupe de sociétés
         """
         # Si pas de groupe défini, pas de contrôle nécessaire
-        if not regle.get('GRP'):
+        if not regle.get('GRP_0'):
             return True
         
         # Si pas de législation définie, pas de contrôle nécessaire
-        if not regle.get('LEG'):
+        if not regle.get('LEG_0'):
             return True
         
         # Ici, on devrait vérifier que le groupe contient au moins
@@ -207,26 +211,26 @@ class DeterminationTaxe:
         """
         query = """
         SELECT * FROM TABVAC 
-        WHERE VACBPR = :regime_tiers 
-        AND VACITM = :niveau_article 
-        AND ENAFLG = 1
+        WHERE VACBPR_0 = :regime_tiers 
+        AND VACITM_0 = :niveau_article 
+        AND ENAFLG_0 = 2
         """
         
         params = {
-            'regime_tiers': criteres['VACBPR'],
-            'niveau_article': criteres['VACITM']
+            'regime_tiers': criteres['VACBPR_0'],
+            'niveau_article': criteres['VACITM_0']
         }
         
         # Ajout des critères optionnels selon priorité
-        if criteres.get('LEG'):
-            query += " AND LEG = :legislation"
-            params['legislation'] = criteres['LEG']
+        if criteres.get('LEG_0'):
+            query += " AND LEG_0 = :legislation"
+            params['legislation'] = criteres['LEG_0']
         
-        if criteres.get('GRP'):
-            query += " AND GRP = :groupe"
-            params['groupe'] = criteres['GRP']
+        # if criteres.get('GRP_0'):
+        #     query += " AND GRP_0 = :groupe"
+        #     params['groupe'] = criteres['GRP_0']
         
-        query += " ORDER BY COD"  # Ordre d'application
+        query += " ORDER BY COD_0"  # Ordre d'application
         
         return self.db.execute(query, params).fetchall()
     
@@ -249,7 +253,7 @@ resultat = determinateur.determiner_code_taxe({
     'regime_taxe_tiers': 'FRA',
     'niveau_taxe_article': 'NOR',
     'legislation': 'FRA',
-    'groupe_societe': 'GRP001'
+    'groupe_societe': 'FR01'
 })
 
 print(f"Code taxe: {resultat}")

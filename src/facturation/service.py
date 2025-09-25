@@ -42,7 +42,7 @@ def get_element_facturation(customer_code: str) -> List[ElementFacturation]:
     cursor = sqlite_conn.cursor()
     for i in range(30):
         query = f"""
-        SELECT T1.INVDTA_{i}, T1.INVDTAAMT_{i}, T2.VALTYP_0, T2.INCDCR_0, , T2.LANDESSHO_0
+        SELECT T1.INVDTA_{i}, T1.INVDTAAMT_{i}, T2.VALTYP_0, T2.INCDCR_0, T2.LANDESSHO_0
         FROM BPCUSTOMER AS T1
         JOIN SFOOTINV AS T2 ON T1.INVDTA_{i} = T2.SFINUM_0
         WHERE BPCNUM_0 = ?

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.facturation.service import get_cond_fac, get_escomte, get_payment_methode
+from src.facturation.service import get_cond_fac, get_element_facturation, get_escomte, get_payment_methode
 from .model import CondFacResponse, Escomte, PayementMode, ElementFacturation
 from typing import List
 

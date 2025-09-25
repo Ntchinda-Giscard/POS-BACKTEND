@@ -41,14 +41,19 @@ def get_element_facturation(customer_code: str) -> List[ElementFacturation]:
     sqlite_conn = sqlite3.connect("sagex3_seed.db")
     cursor = sqlite_conn.cursor()
     for i in range(30):
-        cursor.execute(f"""
+        query = f"""
         SELECT T1.INVDTA_{i}, T1.INVDTAAMT_{i}, T2.VALTYP_0, T2.INCDCR_0
         FROM BPCUSTOMER AS T1
         JOIN SFOOTINV AS T2 ON T1.INVDTA_{i} = T2.SFINUM_0
         WHERE BPCNUM_0 = ?
-        """, (customer_code,))
+        """
+
+        print(f"Exécution de la requête pour l'élément de facturation {i} avec query={query}")
+        cursor.execute(query, (customer_code,))
         row = cursor.fetchone()
-        result.append(ElementFacturation(code=row[0], amount=row[1], type=row[2], majmin=row[3]))
+        print(f"Résultat de la requête pour l'élément de facturation {i}: {row}")
+        if row and row[0]:
+            result.append(ElementFacturation(code=row[0], amount=row[1], type=row[2], majmin=row[3]))
     cursor.close()
     sqlite_conn.close()
     return result

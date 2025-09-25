@@ -491,7 +491,30 @@ class SageX3PricingEngine:
         logger.info(f" Line =====> {line} ")
         result = cursor.fetchone()
         print( "configurations for free items", result['FOCPRO_0'] )
-        free_items = []
+
+        # Get free item configuration from the pricing line
+        # If configuration is 2 that means its a n pout M that is N for M type of free items thus the same item is free meaning a certain amount of this item is free for certain quantity purchased
+        if result['FOCPRO_0'] == '2':
+            if result['FOCTYP_0'] == '1':
+                if context.quantity >= line.get('FOCQTYMIN_0', '0'):
+                    free_items = [{
+                        'item_code': context.item_code,
+                        'quantity': line.get('FOCQTY_0', '0'),
+                    }]
+            elif result['FOCTYP_0'] == '2':
+                free_items = []
+        
+        # If configuration is 3 that means its Autre artcle, that means another article is free giving certian condition of purchase if this article is purchased
+        if result['FOCPRO_0'] == '3':
+            if result['FOCTYP_0'] == '1':
+                if context.quantity >= line.get('FOCQTYMIN_0', '0'):
+                    free_items = [{
+                        'item_code': line.get('FOCITMREF_0', ''),
+                        'quantity': line.get('FOCQTY_0', '0'),
+                    }]
+            elif result['FOCTYP_0'] == '2':
+                free_items = []
+
         
         # Get free item configuration from the pricing line
         # focpro = line.get('FOCPRO_0', '0')  # Free item mechanism type

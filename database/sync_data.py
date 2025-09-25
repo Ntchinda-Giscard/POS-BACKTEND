@@ -36,7 +36,6 @@ tables = [
     "TABMODELIV",
     "STOCK",
     "FACILITY",
-    "FACILITY",
     "SORDER",
     "BPCARRIER",
     "COMPANY",
@@ -61,7 +60,8 @@ tables = [
     "TABRATVAT",
     "TABVACITM",
     "TABVAC",
-    "TAXLINK"
+    "TAXLINK",
+    "SFOOTINV"
 ]
 
 for table in tables:

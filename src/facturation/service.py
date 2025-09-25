@@ -1,5 +1,6 @@
 import sqlite3
-from .model import CondFacResponse, Escomte, PayementMode
+from .model import CondFacResponse, Escomte, PayementMode, ElementFacturation
+from typing import List
 
 def get_payment_methode(customer_code: str) -> PayementMode:
     """  """

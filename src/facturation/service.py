@@ -34,16 +34,18 @@ def get_cond_fac(customer_code: str) -> CondFacResponse:
 
     return CondFacResponse(code=row[0])
 
-def get_element_facturation(customer_code: str):
+def get_element_facturation(customer_code: str) -> List[ElementFacturation]:
 
+    result = []
     sqlite_conn = sqlite3.connect("sagex3_seed.db")
     cursor = sqlite_conn.cursor()
-    for i in range(20):
-        cursor.execute("""
-        SELECT T1.INVDTA_0, T1.INVDTAAMT_0, T2.VALTYP_0, T2.INCDCR_0
+    for i in range(30):
+        cursor.execute(f"""
+        SELECT T1.INVDTA_{i}, T1.INVDTAAMT_{i}, T2.VALTYP_0, T2.INCDCR_0
         FROM BPCUSTOMER AS T1
-        JOIN SFOOTINV AS T2 ON T1.INVDTA_0 = T2.SFINUM_0
+        JOIN SFOOTINV AS T2 ON T1.INVDTA_{i} = T2.SFINUM_0
         WHERE BPCNUM_0 = ?
         """, (customer_code,))
         row = cursor.fetchone()
-    return row
+        result.append(ElementFacturation(code=row[0], amount=row[1], type=row[2], majmin=row[3]))
+    return result

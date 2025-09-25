@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from src.facturation.service import get_cond_fac, get_escomte, get_payment_methode
-from .model import CondFacResponse, Escomte, PayementMode
+from .model import CondFacResponse, Escomte, PayementMode, ElementFacturation
+from typing import List
 
 router = APIRouter(
     prefix="/facture",
@@ -21,3 +22,8 @@ def read_escompte(customer_code: str) -> Escomte:
 def read_cond_fac(customer_code: str) -> CondFacResponse:
 
     return get_cond_fac(customer_code)
+
+@router.get("/element-facturation", response_model=List[ElementFacturation])
+def read_element_facturation(customer_code: str) -> List[ElementFacturation]:
+
+    return get_element_facturation(customer_code)

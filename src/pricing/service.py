@@ -488,6 +488,7 @@ class SageX3PricingEngine:
 
         query = f"""SELECT FOCPRO_0, FOCTYP_0 FROM SPRICCONF WHERE PLI_0 = ?"""
         cursor.execute(query, (line.get('PLI_0'),))
+        logger.info(f" Line =====> {line} ")
         result = cursor.fetchone()
         print( "configurations for free items", result['FOCPRO_0'] )
         free_items = []

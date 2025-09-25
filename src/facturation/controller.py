@@ -23,7 +23,7 @@ def read_cond_fac(customer_code: str) -> CondFacResponse:
 
     return get_cond_fac(customer_code)
 
-@router.get("/element-facturation", response_model=List[ElementFacturation])
+@router.get("/element", response_model=List[ElementFacturation])
 def read_element_facturation(customer_code: str) -> List[ElementFacturation]:
 
     return get_element_facturation(customer_code)

@@ -491,27 +491,30 @@ class SageX3PricingEngine:
         logger.info(f" Line =====> {line} ")
         result = cursor.fetchone()
         print( "configurations for free items", result['FOCPRO_0'] )
+        free_items = []
 
         # Get free item configuration from the pricing line
         # If configuration is 2 that means its a n pout M that is N for M type of free items thus the same item is free meaning a certain amount of this item is free for certain quantity purchased
         if result['FOCPRO_0'] == '2':
             if result['FOCTYP_0'] == '1':
-                if context.quantity >= line.get('FOCQTYMIN_0', '0'):
-                    free_items = [{
+                if context.quantity >= Decimal(line.get('FOCQTYMIN_0', '0')):
+                    free_items.append({
                         'item_code': context.item_code,
                         'quantity': line.get('FOCQTY_0', '0'),
-                    }]
+                        'unit_of_measure': line.get('UOM_0', '')
+                    })
             elif result['FOCTYP_0'] == '2':
                 free_items = []
         
         # If configuration is 3 that means its Autre artcle, that means another article is free giving certian condition of purchase if this article is purchased
         if result['FOCPRO_0'] == '3':
             if result['FOCTYP_0'] == '1':
-                if context.quantity >= line.get('FOCQTYMIN_0', '0'):
-                    free_items = [{
+                if context.quantity >= Decimal(line.get('FOCQTYMIN_0', '0')):
+                    free_items.append({
                         'item_code': line.get('FOCITMREF_0', ''),
                         'quantity': line.get('FOCQTY_0', '0'),
-                    }]
+                        'unit_of_measure': line.get('UOM_0', '')
+                    })
             elif result['FOCTYP_0'] == '2':
                 free_items = []
 
@@ -1286,7 +1289,7 @@ def test_pricing_engine_complete(input_contexts: List[PricingInput]) -> List[Pri
                     # Calculate value of free items if possible
                     if free_item['item_code'] == context.item_code:
                         # Same item - use calculated unit price
-                        free_value = result.unit_price * free_item['quantity']
+                        free_value = result.unit_price * Decimal(free_item['quantity'])
                         print(f"  Estimated value: {free_value} {result.currency}")
                 print()
             else:

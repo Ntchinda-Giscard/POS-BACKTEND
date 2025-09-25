@@ -9,3 +9,9 @@ class Escomte(BaseModel):
 
 class CondFacResponse(BaseModel):
     code: str
+
+class ElementFacturation(BaseModel):
+    code: str
+    amount: float
+    type: int
+    majmin: int

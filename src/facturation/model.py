@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel
 
 class PayementMode(BaseModel):
@@ -15,3 +16,4 @@ class ElementFacturation(BaseModel):
     amount: float
     type: int
     majmin: int
+    description: Optional[str] = None

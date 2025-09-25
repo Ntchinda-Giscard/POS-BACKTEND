@@ -48,4 +48,6 @@ def get_element_facturation(customer_code: str) -> List[ElementFacturation]:
         """, (customer_code,))
         row = cursor.fetchone()
         result.append(ElementFacturation(code=row[0], amount=row[1], type=row[2], majmin=row[3]))
+    cursor.close()
+    sqlite_conn.close()
     return result

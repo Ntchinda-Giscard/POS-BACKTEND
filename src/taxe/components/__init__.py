@@ -17,11 +17,9 @@ class DeterminationTaxe:
             
             # 2. Construction des critères de recherche
             criteres = self._construire_criteres(donnees_vente)
-            print(f"Critères construits: {criteres}")
 
             # 3. Recherche des règles applicables
             regles = self._rechercher_regles_applicables(criteres)
-            print(f"Règles trouvées: {regles}")
             # 4. Application de la première règle valide
             code_taxe = self._appliquer_premiere_regle_valide(
                 regles, donnees_vente

@@ -805,6 +805,7 @@ class SageX3PricingEngine:
         # Process each configuration by priority
         for config in configs:
             logger.debug(f"Processing pricing config: {config['PLI_0']} (priority: {config['PIO_0']})")
+            print(f"Processing pricing config: {config['PLI_0']} (priority: {config['PIO_0']})")
             
             # Find applicable pricing lines
             applicable_lines = self.find_applicable_pricing_lines(context, config)

@@ -292,8 +292,8 @@ class SageX3PricingEngine:
                 params.append(criteria[criteria_field])
         
         # Match quantity range
-        where_conditions.append("(MINQTY_0 <= ? OR MINQTY_0 = 0)")
-        where_conditions.append("(MAXQTY_0 >= ? OR MAXQTY_0 = 0)")
+        where_conditions.append("(CAST(MINQTY_0 AS REAL) <= ? OR CAST(MINQTY_0 AS REAL) = 0)")
+        where_conditions.append("(CAST(MAXQTY_0 AS REAL) >= ? OR CAST(MAXQTY_0 AS REAL) = 0)")
         params.extend([float(context.quantity), float(context.quantity)])
         
         # Match currency
@@ -317,6 +317,7 @@ class SageX3PricingEngine:
         logger.debug(f"Query parameters: {params}")
         
         cursor.execute(query, params)
+        print(f"Applicable pricing query: {query} with params: {params}")
         results = cursor.fetchall()
         
         applicable_lines = []

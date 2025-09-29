@@ -113,4 +113,5 @@ def create_commande(input: CreateCommandRequest):
             line.quantity
         ))
 
+    return { 'sorder': sohnnum }
 

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel
 from yaml import FlowEntryToken
 
@@ -11,7 +11,7 @@ class LigneCommande(BaseModel):
     num_comd: str
     item_code: str
     quantity: int
-    prix_brut: float
+    prix_brut: Optional[float] = None
     prix_net_ht: float
     prix_net_ttc: float
     free_items: List[Dict[str, Any]] = None # type: ignore

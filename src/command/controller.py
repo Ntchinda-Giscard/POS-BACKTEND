@@ -1,6 +1,6 @@
 from typing import List
 from src.command.service import get_command_types
-from .model import CommandTypeRRequest
+from .model import CommandTypeRRequest, CreateCommandRequest
 from fastapi import APIRouter
 
 router = APIRouter(
@@ -11,3 +11,8 @@ router = APIRouter(
 @router.get("/type", response_model=List[CommandTypeRRequest])
 def read_commande_types():
     return get_command_types()
+
+
+@router.post("/add")
+def create_commande(input: CreateCommandRequest):
+    return create_commande(input)

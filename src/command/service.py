@@ -16,7 +16,7 @@ def get_command_types() -> List[CommandTypeRRequest]:
 
     return result
 
-def create_commande(input: CreateCommandRequest):
+def create_commande(inputs: CreateCommandRequest):
     """Create a new command in the database."""
     sorder_auuid = uuid.uuid4()
     sorder_binary_id = sorder_auuid.bytes
@@ -76,24 +76,26 @@ def create_commande(input: CreateCommandRequest):
     sorder_out = cursor.execute( query_create_sorder,(
         sorder_binary_id,
         sohnnum,
-        input.comd_type,
-        input.site_vente,
-        input.client_comd,
-        input.client_facture,
-        input.client_payeur,
-        input.currency,
-        input.total_ht,
-        input.total_ttc,
-        input.valo_ht,
-        input.valo_ttc,
-        input.price_type
+        inputs.comd_type,
+        inputs.site_vente,
+        inputs.client_comd,
+        inputs.client_facture,
+        inputs.client_payeur,
+        inputs.currency,
+        inputs.total_ht,
+        inputs.total_ttc,
+        inputs.valo_ht,
+        inputs.valo_ttc,
+        inputs.price_type
     ))
 
-    for line in input.ligne:
+    for line in inputs.ligne:
         sorderp_auuid = uuid.uuid4()
         sorderp_binary_id = sorderp_auuid.bytes
         sorderq_auuid = uuid.uuid4()
         sorderq_binary_id = sorderq_auuid.bytes
+        focflg_value = 1 if (line.free_items is not None and len(line.free_items) > 0) else 0
+
 
         sorderp_out = cursor.execute( query_create_sorderp,(
             sorderp_binary_id,
@@ -101,7 +103,7 @@ def create_commande(input: CreateCommandRequest):
             line.prix_brut,
             line.prix_net_ht,
             line.prix_net_ttc,
-            1 if len(line.free_items) > 0 else 0,  # Assuming FOCFLG_0 is 0 for simplicity
+            focflg_value,
             line.item_code
         ))
 

@@ -24,19 +24,19 @@ def create_commande(input: CreateCommandRequest):
     query_create_sorder = """
             INSERT INTO
         SORDER (
-            AUUID_0,
-            SOHNUM_0,
-            SOHTYP_0,
-            SALFCY_0,
-            BPCORD_0,
-            BPCINV_0,
-            BPCPYR_0,
-            CUR_0,
-            ORDNOT_0,
-            ORDATI_0,
-            ORDINVNOT_0,
-            ORDINVATI_0,
-            PRITYP_0
+            AUUID_0, -- uuid
+            SOHNUM_0, -- order number
+            SOHTYP_0, -- order type
+            SALFCY_0, -- site de vente
+            BPCORD_0, -- order client
+            BPCINV_0, -- invoice client
+            BPCPYR_0, -- payer client
+            CUR_0, -- currency
+            ORDNOT_0, -- total ligne ht prix
+            ORDATI_0, -- total ligne ttc prix
+            ORDINVNOT_0, -- valorisation Ht
+            ORDINVATI_0, -- valorisation TTC
+            PRITYP_0 -- price type
         )
         VALUES
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -72,3 +72,42 @@ def create_commande(input: CreateCommandRequest):
     cursor = sqlite_conn.cursor()
 
     sohnnum = str(uuid.uuid4())[:8]  # Generate a unique order number
+
+    sorder_out = cursor.execute( query_create_sorder,(
+        sorder_binary_id,
+        sohnnum,
+        input.comd_type,
+        input.site_vente,
+        input.client_comd,
+        input.client_facture,
+        input.client_payeur,
+        input.currency,
+        input.total_ht,
+        input.total_ttc,
+        input.valo_ht,
+        input.valo_ttc,
+        input.price_type
+    ))
+
+    for line in input.ligne:
+        sorderp_auuid = uuid.uuid4()
+        sorderq_auuid = uuid.uuid4()
+        sorderp_out = cursor.execute( query_create_sorderp,(
+            sorder_binary_id,
+            sohnnum,
+            line.item_code,
+            line.prix_net_ht,
+            line.prix_net_ttc,
+            0,  # Assuming FOCFLG_0 is 0 for simplicity
+            line.item_code
+        ))
+
+        sorderq_out = cursor.execute( query_create_sorderq,(
+            sorder_binary_id,
+            sohnnum,
+            line.item_code,
+            1,  # Assuming QTY_0 is 1 for simplicity
+            1   # Assuming ALLQTY_0 is 1 for simplicity
+        ))
+
+

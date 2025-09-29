@@ -17,6 +17,9 @@ def get_command_types() -> List[CommandTypeRRequest]:
     return result
 
 def create_commande(input: CreateCommandRequest):
+    """Create a new command in the database."""
+    sorder_auuid = uuid.uuid4()
+    sorder_binary_id = sorder_auuid.bytes
     
     query_create_sorder = """
             INSERT INTO
@@ -64,5 +67,8 @@ def create_commande(input: CreateCommandRequest):
             VALUES
             (?, ?, ?, ?, ?)
         """
+    
     sqlite_conn = sqlite3.connect("sagex3_seed.db")
     cursor = sqlite_conn.cursor()
+
+    sohnnum = str(uuid.uuid4())[:8]  # Generate a unique order number

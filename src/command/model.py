@@ -16,6 +16,7 @@ class LigneCommande(BaseModel):
 
 class CreateCommandRequest(BaseModel):
     num_comd: str
+    site_vente: str
     currency: str
     client_comd: str
     client_payeur: str
@@ -24,3 +25,5 @@ class CreateCommandRequest(BaseModel):
     total_ttc: float
     valo_ht: float
     valo_ttc: float
+    price_type: int
+    ligne: List[LigneCommande]

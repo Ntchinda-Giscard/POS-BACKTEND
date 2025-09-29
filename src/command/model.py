@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 from pydantic import BaseModel
 
 class CommandTypeRRequest(BaseModel):
@@ -26,4 +26,5 @@ class CreateCommandRequest(BaseModel):
     valo_ht: float
     valo_ttc: float
     price_type: int
+    comd_type: str
     ligne: List[LigneCommande]

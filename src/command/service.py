@@ -1,6 +1,6 @@
 import sqlite3
 from typing import List
-from ..command.model import CommandTypeRRequest
+from ..command.model import CommandTypeRRequest, CreateCommandRequest
 
 def get_command_types() -> List[CommandTypeRRequest]:
     """Fetch command types from the database."""
@@ -15,10 +15,39 @@ def get_command_types() -> List[CommandTypeRRequest]:
 
     return result
 
-def create_commande():
-    query = """
-        INSERT INTO SORDER (name, email, age)
-        VALUES (?, ?, ?)
+def create_commande(input: CreateCommandRequest):
+    
+    query_create_sorder = """
+            INSERT INTO
+        SORDER (
+            AUUID_0,
+            SOHNUM_0,
+            SOHTYP_0,
+            SALFCY_0,
+            BPCORD_0,
+            BPCINV_0,
+            BPCPYR_0,
+            CUR_0,
+            ORDNOT_0,
+            ORDATI_0,
+            ORDINVNOT_0,
+            ORDINVATI_0,
+            PRITYP_0
+        )
+        VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
 
-    
+    query_create_sorderp = """
+            INSERT INTO SORDERP(
+                AUUID_0,
+                SOHNUM_0,
+                GROPRI_0,
+                NETPRINOT_0,
+                NETPRINATI_0,
+                FOCFLG_0,
+                ITMREF_0
+            )
+            VALUES
+            (?, ?, ?, ?, ?, ?, ?)
+"""

@@ -317,7 +317,7 @@ class SageX3PricingEngine:
         logger.debug(f"Query parameters: {params}")
         
         cursor.execute(query, params)
-        print(f"Applicable pricing query: {query} with params: {params}")
+        # print(f"Applicable pricing query: {query} with params: {params}")
         results = cursor.fetchall()
         
         applicable_lines = []
@@ -496,28 +496,28 @@ class SageX3PricingEngine:
 
         # Get free item configuration from the pricing line
         # If configuration is 2 that means its a n pout M that is N for M type of free items thus the same item is free meaning a certain amount of this item is free for certain quantity purchased
-        if result['FOCPRO_0'] == '2':
-            if result['FOCTYP_0'] == '1':
-                if context.quantity >= Decimal(line.get('FOCQTYMIN_0', '0')):
-                    free_items.append({
-                        'item_code': context.item_code,
-                        'quantity': line.get('FOCQTY_0', '0'),
-                        'unit_of_measure': line.get('UOM_0', '')
-                    })
-            elif result['FOCTYP_0'] == '2':
-                free_items = []
+        # if result['FOCPRO_0'] == '2':
+        #     if result['FOCTYP_0'] == '1':
+        #         if context.quantity >= Decimal(line.get('FOCQTYMIN_0', '0')):
+        #             free_items.append({
+        #                 'item_code': context.item_code,
+        #                 'quantity': line.get('FOCQTY_0', '0'),
+        #                 'unit_of_measure': line.get('UOM_0', '')
+        #             })
+        #     elif result['FOCTYP_0'] == '2':
+        #         free_items = []
         
-        # If configuration is 3 that means its Autre artcle, that means another article is free giving certian condition of purchase if this article is purchased
-        if result['FOCPRO_0'] == '3':
-            if result['FOCTYP_0'] == '1':
-                if context.quantity >= Decimal(line.get('FOCQTYMIN_0', '0')):
-                    free_items.append({
-                        'item_code': line.get('FOCITMREF_0', ''),
-                        'quantity': line.get('FOCQTY_0', '0'),
-                        'unit_of_measure': line.get('UOM_0', '')
-                    })
-            elif result['FOCTYP_0'] == '2':
-                free_items = []
+        # # If configuration is 3 that means its Autre artcle, that means another article is free giving certian condition of purchase if this article is purchased
+        # if result['FOCPRO_0'] == '3':
+        #     if result['FOCTYP_0'] == '1':
+        #         if context.quantity >= Decimal(line.get('FOCQTYMIN_0', '0')):
+        #             free_items.append({
+        #                 'item_code': line.get('FOCITMREF_0', ''),
+        #                 'quantity': line.get('FOCQTY_0', '0'),
+        #                 'unit_of_measure': line.get('UOM_0', '')
+        #             })
+        #     elif result['FOCTYP_0'] == '2':
+        #         free_items = []
 
         
         # Get free item configuration from the pricing line
@@ -534,7 +534,7 @@ class SageX3PricingEngine:
         focitmref = line.get('FOCITMREF_0', '').strip()  # Free item reference
         focqty = Decimal(str(line.get('FOCQTY_0', '0')))  # Free quantity per trigger
         
-        if focpro == '0' or focpro == '' or focqty <= 0:
+        if focpro == '1' or focpro == '' or focqty <= 1:
             logger.debug("No free item configuration found or invalid")
             return free_items
             
@@ -554,14 +554,14 @@ class SageX3PricingEngine:
         print(f"Quantity threshold: {focqtymin}")
         print(f"Amount threshold: {focamtmin} {context.currency}")
         
-        if focpro == '1':  # N pour M (same item free)
+        if focpro == '2':  # N pour M (same item free)
             free_items = self.calculate_n_for_m_free_items(
                 context, foctyp, focqtymin, focqtybkt, focqty, line_amount, focamtmin, focamtbkt
             )
             
-        elif focpro == '2':  # Autre Article (different item free)  
+        elif focpro == '3':  # Autre Article (different item free)  
             if not focitmref:
-                logger.warning("FOCPRO=2 (Autre Article) but no FOCITMREF specified")
+                logger.warning("FOCPRO=3 (Autre Article) but no FOCITMREF specified")
                 return free_items
                 
             free_items = self.calculate_other_item_free_items(
@@ -569,9 +569,9 @@ class SageX3PricingEngine:
                 line_amount, focamtmin, focamtbkt
             )
             
-        elif focpro == '3':  # Total Commande (order total based)
+        elif focpro == '4':  # Total Commande (order total based)
             # This would require full order context, approximating with current line
-            logger.warning("FOCPRO=3 (Total Commande) approximated as single line")
+            logger.warning("FOCPRO=4 (Total Commande) approximated as single line")
             free_items = self.calculate_order_total_free_items(
                 context, foctyp, focqtymin, focqtybkt, focitmref, focqty,
                 line_amount, focamtmin, focamtbkt

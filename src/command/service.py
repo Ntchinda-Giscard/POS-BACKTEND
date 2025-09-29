@@ -14,3 +14,11 @@ def get_command_types() -> List[CommandTypeRRequest]:
         result.append(CommandTypeRRequest(code=row[0], description=row[1]))
 
     return result
+
+def create_commande():
+    query = """
+        INSERT INTO SORDER (name, email, age)
+        VALUES (?, ?, ?)
+    """
+
+    

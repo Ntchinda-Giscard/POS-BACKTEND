@@ -61,7 +61,9 @@ tables = [
     "TABVACITM",
     "TABVAC",
     "TAXLINK",
-    "SFOOTINV"
+    "SFOOTINV",
+    "SORDERQ",
+    "SORDERP"
 ]
 
 for table in tables:

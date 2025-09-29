@@ -51,7 +51,6 @@ def get_element_facturation(customer_code: str) -> List[ElementFacturation]:
         print(f"Exécution de la requête pour l'élément de facturation {i} avec query={query}")
         cursor.execute(query, (customer_code,))
         row = cursor.fetchone()
-        print(f"Résultat de la requête pour l'élément de facturation {i}: {row}")
         if row and row[0]:
             result.append(ElementFacturation(code=row[0], amount=row[1], type=row[2], majmin=row[3], description=row[4]))
     cursor.close()

@@ -48,7 +48,7 @@ def create_commande(inputs: CreateCommandRequest):
                 SOHNUM_0,
                 GROPRI_0,
                 NETPRINOT_0,
-                NETPRINATI_0,
+                NETPRIATI_0,
                 FOCFLG_0,
                 ITMREF_0
             )
@@ -62,7 +62,7 @@ def create_commande(inputs: CreateCommandRequest):
                 SOHNUM_0,
                 ITMREF_0,
                 QTY_0,
-                ALLQTY_0,
+                ALLQTY_0
             )
             VALUES
             (?, ?, ?, ?, ?)

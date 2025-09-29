@@ -91,19 +91,22 @@ def create_commande(input: CreateCommandRequest):
 
     for line in input.ligne:
         sorderp_auuid = uuid.uuid4()
+        sorderp_binary_id = sorderp_auuid.bytes
         sorderq_auuid = uuid.uuid4()
+        sorderq_binary_id = sorderq_auuid.bytes
+
         sorderp_out = cursor.execute( query_create_sorderp,(
-            sorder_binary_id,
+            sorderp_binary_id,
             sohnnum,
-            line.item_code,
+            line.prix_brut,
             line.prix_net_ht,
             line.prix_net_ttc,
-            0,  # Assuming FOCFLG_0 is 0 for simplicity
+            1 if len(line.free_items) > 0 else 0,  # Assuming FOCFLG_0 is 0 for simplicity
             line.item_code
         ))
 
         sorderq_out = cursor.execute( query_create_sorderq,(
-            sorder_binary_id,
+            sorderp_binary_id,
             sohnnum,
             line.item_code,
             1,  # Assuming QTY_0 is 1 for simplicity

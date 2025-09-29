@@ -9,8 +9,9 @@ class CommandTypeRRequest(BaseModel):
 class LigneCommande(BaseModel):
     num_comd: str
     item_code: str
-    prix_net_ht: str
-    prix_net_ttc: str
+    prix_brut: float
+    prix_net_ht: float
+    prix_net_ttc: float
     free_items: List[Dict[str, Any]] = None # type: ignore
 
 

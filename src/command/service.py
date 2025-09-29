@@ -1,6 +1,7 @@
 import sqlite3
 from typing import List
 from ..command.model import CommandTypeRRequest, CreateCommandRequest
+import uuid
 
 def get_command_types() -> List[CommandTypeRRequest]:
     """Fetch command types from the database."""
@@ -50,4 +51,18 @@ def create_commande(input: CreateCommandRequest):
             )
             VALUES
             (?, ?, ?, ?, ?, ?, ?)
-"""
+        """
+
+    query_create_sorderq = """
+            INSERT INTO SORDERQ(
+                AUUID_0,
+                SOHNUM_0,
+                ITMREF_0,
+                QTY_0,
+                ALLQTY_0,
+            )
+            VALUES
+            (?, ?, ?, ?, ?)
+        """
+    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    cursor = sqlite_conn.cursor()

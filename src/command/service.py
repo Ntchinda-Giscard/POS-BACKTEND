@@ -109,8 +109,8 @@ def create_commande(input: CreateCommandRequest):
             sorderp_binary_id,
             sohnnum,
             line.item_code,
-            1,  # Assuming QTY_0 is 1 for simplicity
-            1   # Assuming ALLQTY_0 is 1 for simplicity
+            line.quantity,
+            line.quantity
         ))
 
 

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from database.sync_data import sync_data
 from src.articles.controller import router as article_router
 from src.addresse.controller import router as address_router
 from src.command.controller import router as command_router
@@ -12,6 +13,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
+
+sync_data()
+
+
 
 app.add_middleware(
     CORSMiddleware,

@@ -26,6 +26,7 @@ def create_commande(inputs: CreateCommandRequest):
         SORDER (
             AUUID_0, -- uuid
             SOHNUM_0, -- order number
+            VACBPR_0, -- regime taxe
             SOHTYP_0, -- order type
             SALFCY_0, -- site de vente
             BPCORD_0, -- order client
@@ -39,7 +40,7 @@ def create_commande(inputs: CreateCommandRequest):
             PRITYP_0 -- price type
         )
         VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
 
     query_create_sorderp = """
@@ -71,11 +72,13 @@ def create_commande(inputs: CreateCommandRequest):
     sqlite_conn = sqlite3.connect("sagex3_seed.db")
     cursor = sqlite_conn.cursor()
 
-    sohnnum = str(uuid.uuid4())[:8]  # Generate a unique order number
+    # sohnnum = str(uuid.uuid4())[:8]  # Generate a unique order number
+    sohnnum = inputs.num_comd
 
     sorder_out = cursor.execute( query_create_sorder,(
         sorder_binary_id,
         sohnnum,
+        inputs.regime_taxe,
         inputs.comd_type,
         inputs.site_vente,
         inputs.client_comd,
@@ -114,6 +117,9 @@ def create_commande(inputs: CreateCommandRequest):
             line.quantity,
             line.quantity
         ))
-
+    
+    
+    sqlite_conn.commit()
+    sqlite_conn.close()
     return { 'sorder': sohnnum }
 

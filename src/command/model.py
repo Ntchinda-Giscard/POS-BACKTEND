@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel
-from yaml import FlowEntryToken
 
 class CommandTypeRRequest(BaseModel):
     code: str
@@ -29,5 +28,6 @@ class CreateCommandRequest(BaseModel):
     valo_ht: float
     valo_ttc: float
     price_type: int
+    regime_taxe: str
     comd_type: str
     ligne: List[LigneCommande]

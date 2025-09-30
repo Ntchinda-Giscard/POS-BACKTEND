@@ -10,6 +10,7 @@ from src.facturation.controller import router as facture_router
 from src.pricing.controller import router as pricing_router
 from fastapi.middleware.cors import CORSMiddleware
 
+
 app = FastAPI()
 
 app.add_middleware(

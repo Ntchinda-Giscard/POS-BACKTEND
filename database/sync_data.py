@@ -1,7 +1,12 @@
 import pyodbc
 import sqlite3
 from decimal import Decimal
+import logging
 
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def sync_data():

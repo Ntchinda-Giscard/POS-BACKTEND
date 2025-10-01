@@ -52,7 +52,7 @@ def get_articles_site(input: ArticleInput) -> List[ArticleRequest]:
             categorie=article[2],
             base_price=article[3] or 0.0,
             unit_sales=article[4] or "",
-            image=img_b64,   # ✅ base64 string instead of bytes
+            image=img_b64,   
             stock=article[6] or 0.0,
         ))
 

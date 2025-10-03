@@ -10,11 +10,36 @@ from src.livraison.controller import router as livraison_router
 from src.facturation.controller import router as facture_router
 from src.pricing.controller import router as pricing_router
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi_utils.tasks import repeat_every
+from contextlib import asynccontextmanager
+import asyncio
 
+async def periodic_sync():
+    """Run sync_data every 5 minutes"""
+    while True:
+        try:
+            sync_data()
+        except Exception as e:
+            print(f"Error in periodic sync: {e}")
+        await asyncio.sleep(60 * 15)  # 5 minutes
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Create background task
+    task = asyncio.create_task(periodic_sync())
+    
+    yield  # Application runs here
+    
+    # Shutdown: Cancel background task
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
 
-sync_data()
+app = FastAPI(lifespan=lifespan)
+
+# sync_data()
 
 
 
@@ -39,6 +64,12 @@ app.include_router(pricing_router)
 @app.get("/")
 def read_root():
     return {"API_CHECK": "UP and Running"}
+
+# @app.on_event("startup")
+# @repeat_every(seconds=60 * 5)  # every 5 minutes
+# def sync_endpoint():
+#     sync_data()
+    
 
 if __name__ == "__main__":
     import uvicorn

@@ -21,7 +21,7 @@ def sync_data():
     sqlserver_cursor = sqlserver_conn.cursor()
 
     # --- 2. Connect to SQLite ---
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    sqlite_conn = sqlite3.connect("sagex3_seed.db", timeout=30, check_same_thread=False)
     sqlite_cursor = sqlite_conn.cursor()
 
     # --- 3. SEED schema tables to copy ---

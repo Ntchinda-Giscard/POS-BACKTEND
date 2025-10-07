@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel
+from datetime import date
 
 class CommandTypeRRequest(BaseModel):
     code: str
@@ -30,4 +31,5 @@ class CreateCommandRequest(BaseModel):
     price_type: int
     regime_taxe: str
     comd_type: str
+    date_comd: Optional[str] = date.today().isoformat()
     ligne: List[LigneCommande]

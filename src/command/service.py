@@ -37,10 +37,12 @@ def create_commande(inputs: CreateCommandRequest):
             ORDATI_0, -- total ligne ttc prix
             ORDINVNOT_0, -- valorisation Ht
             ORDINVATI_0, -- valorisation TTC
-            PRITYP_0 -- price type
+            PRITYP_0, -- price type
+            ORDDAT_0, -- order date (auto set by DB)
+            UPDUSR_0 -- user who created/updated (auto set by DB)
         )
         VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
 
     query_create_sorderp = """
@@ -89,7 +91,9 @@ def create_commande(inputs: CreateCommandRequest):
         inputs.total_ttc,
         inputs.valo_ht,
         inputs.valo_ttc,
-        inputs.price_type
+        inputs.price_type,
+        inputs.date_comd,
+        "ADMIN"
     ))
 
     for line in inputs.ligne:
@@ -101,7 +105,7 @@ def create_commande(inputs: CreateCommandRequest):
 
 
         sorderp_out = cursor.execute( query_create_sorderp,(
-            sorderp_binary_id,
+            sorderq_binary_id,
             sohnnum,
             line.prix_brut,
             line.prix_net_ht,

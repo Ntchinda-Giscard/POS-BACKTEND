@@ -1,11 +1,14 @@
 import sqlite3
 from .model import CondFacResponse, Escomte, PayementMode, ElementFacturation
 from typing import List
+from ...database.sync_data import sync_data_new
 
 def get_payment_methode(customer_code: str) -> PayementMode:
     """  """
 
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
     cursor.execute("SELECT  PTE_0 FROM BPCUSTOMER WHERE BPCNUM_0 = ?", (customer_code, ))
 
@@ -15,7 +18,9 @@ def get_payment_methode(customer_code: str) -> PayementMode:
 
 def get_escomte(customer_code: str) -> Escomte:
 
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
 
     cursor = sqlite_conn.cursor()
     cursor.execute("SELECT  DEP_0 FROM BPCUSTOMER WHERE BPCINV_0 = ? ", (customer_code,))
@@ -26,7 +31,9 @@ def get_escomte(customer_code: str) -> Escomte:
 
 def get_cond_fac(customer_code: str) -> CondFacResponse:
 
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
 
     cursor.execute("SELECT  INVCND_0 FROM BPCUSTOMER WHERE BPCINV_0 = ?", (customer_code,))
@@ -37,8 +44,10 @@ def get_cond_fac(customer_code: str) -> CondFacResponse:
 
 def get_element_facturation(customer_code: str) -> List[ElementFacturation]:
 
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
     result = []
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
     cursor = sqlite_conn.cursor()
     for i in range(30):
         query = f"""

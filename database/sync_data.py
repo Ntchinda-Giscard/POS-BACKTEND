@@ -74,6 +74,8 @@ def sync_data():
         "SORDERP"
     ]
 
+
+
     for table in tables:
         print(f" Processing table: SEED.{table}")
 

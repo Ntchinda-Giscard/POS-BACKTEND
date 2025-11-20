@@ -1,6 +1,7 @@
 import sqlite3
 from typing import Dict, List
 import base64
+from ...database.sync_data import sync_data_new
 
 # from src.articles.model import ArticleInput
 
@@ -8,8 +9,10 @@ from ..articles.model import ArticleInput, ArticleRequest
 
 
 def get_articles_site(input: ArticleInput) -> List[ArticleRequest]:
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
     results = []
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
     sqlite_cursor = sqlite_conn.cursor()
 
     sqlite_cursor.execute("""
@@ -57,11 +60,14 @@ def get_articles_site(input: ArticleInput) -> List[ArticleRequest]:
         ))
 
     return results
+
 def search_article(site_id: str, q: str) -> List[ArticleRequest]:
 
     results = []
     # --- .1 Connect to SQLite ---
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
     sqlite_cursor = sqlite_conn.cursor()
 
     # --- .2 Execute SQL Query ---

@@ -176,8 +176,10 @@ def sync_data_new():
         print("New DB installed at:", final_db_path)
 
         # Remove ZIP file from source once processed
-        os.remove(zip_file)
-        print("ZIP removed from source:", zip_file)
+        # os.remove(zip_file)
+        # print("ZIP removed from source:", zip_file)
+
+        return final_db_path
 
     else:
         print("No ZIP file found in source folder.")

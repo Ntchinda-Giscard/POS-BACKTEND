@@ -2,12 +2,15 @@ import sqlite3
 from typing import List
 from unittest import result
 from ..clients.model import ClientFactureResponse, ClientResponse, TierResponse
+from ...database.sync_data import sync_data_new
 
 def get_clients() -> List[ClientResponse]:
     """Fetch clients from the database."""
-    result = []
 
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
+    result = []
     cursor = sqlite_conn.cursor()
     cursor.execute("""
 SELECT
@@ -34,9 +37,10 @@ ORDER BY
 
 def get_tiers(customer_code: str) -> TierResponse:
     """" Get tiers """
-    result = []
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
 
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
     cursor = sqlite_conn.cursor()
     cursor.execute(("""SELECT "BPCPYR_0", "BPCNAM_0" FROM BPARTNER 
     JOIN BPCUSTOMER
@@ -54,7 +58,9 @@ def get_tiers(customer_code: str) -> TierResponse:
 def get_client_facture(code_client: str) -> ClientFactureResponse:
     """Fetch clients from the database."""
 
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
     cursor.execute("SELECT BPCINV_0 FROM BPCUSTOMER WHERE BPCNUM_0 = ? ", ("C0001",))
 

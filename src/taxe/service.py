@@ -4,13 +4,16 @@ import sqlite3
 from typing import List
 from unittest import result
 from ..taxe.model import AppliedTaxInput, AppliedTaxResponse, TaxeResponse
+from ...database.sync_data import sync_data_new
 
 
 def get_regime_taxe(customer_code: str) -> TaxeResponse:
     """Fetch tax regime from the database."""
     # Simulated database fetch
-    sqlite3_conn = sqlite3.connect("sagex3_seed.db")
-    cursor = sqlite3_conn.cursor() 
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
+    cursor = sqlite_conn.cursor() 
     cursor.execute("""
         SELECT
             VACBPR_0

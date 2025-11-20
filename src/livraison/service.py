@@ -2,12 +2,16 @@ from unittest import result
 from .model import ModeDeLivraisonRequest, TransPorteurResponse
 import sqlite3
 from typing import List
+from ...database.sync_data import sync_data_new
 
 
 def get_mode_livraison() -> List[ModeDeLivraisonRequest]:
-    results = []
 
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
+
+    results = []
     cursor = sqlite_conn.cursor()
     cursor.execute("SELECT MDL_0 FROM TABMODELIV")
 
@@ -20,9 +24,11 @@ def get_mode_livraison() -> List[ModeDeLivraisonRequest]:
     return results
 
 def get_transporteur() -> List[TransPorteurResponse]:
-    results = []
 
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
+    results = []
     cursor = sqlite_conn.cursor()
     cursor.execute("SELECT BPTNUM_0, BPTNAM_0 FROM BPCARRIER")
 

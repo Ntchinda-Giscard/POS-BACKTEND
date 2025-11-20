@@ -2,12 +2,46 @@ import pyodbc
 import sqlite3
 from decimal import Decimal
 import logging
-
+import os
+import zipfile
+import shutil
 
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+def get_single_zip(folder):
+    """Return the only ZIP file in the folder, or None."""
+    files = [f for f in os.listdir(folder) if f.endswith(".zip")]
+    return os.path.join(folder, files[0]) if files else None
+
+
+def extract_zip(zip_path, extract_to):
+    """Extract ZIP and return the extracted DB file path."""
+    with zipfile.ZipFile(zip_path, "r") as z:
+        z.extractall(extract_to)
+        for name in z.namelist():
+            if name.endswith(".db"):
+                return os.path.join(extract_to, name)
+    return None
+
+
+def clean_destination(folder):
+    """Remove all .db files in the destination folder."""
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
+    for f in os.listdir(folder):
+        if f.endswith(".db"):
+            os.remove(os.path.join(folder, f))
+
+
+def move_db(db_file, destination_folder):
+    """Move DB file to destination."""
+    dest_file = os.path.join(destination_folder, os.path.basename(db_file))
+    shutil.move(db_file, dest_file)
+    return dest_file
 
 def sync_data():
     # --- 1. Connect to SQL Server ---
@@ -111,6 +145,42 @@ def sync_data():
     sqlite_conn.close()
     print(" All SEED tables copied successfully!")
 
+def sync_data_new():
+    db_path = r"c:/posdatabase/config.db"
+    folder_conn = sqlite3.connect(db_path)
+    folder_cursor = folder_conn.cursor()
+    folder_cursor.execute("SELECT * FROM configurations_folders")
+    folder_rows = folder_cursor.fetchone()
+    folder_conn.close()
+
+    source_folder = folder_rows[1]
+    destination_folder = folder_rows[2]
+
+    # -----------------------
+    # MAIN LOGIC
+    # -----------------------
+
+    zip_file = get_single_zip(source_folder)
+
+    if zip_file:
+        print("ZIP found:", zip_file)
+
+        extracted_db = extract_zip(zip_file, source_folder)
+        print("Extracted DB:", extracted_db)
+
+        # Clean destination (remove old DB)
+        clean_destination(destination_folder)
+
+        # Move new DB to destination
+        final_db_path = move_db(extracted_db, destination_folder)
+        print("New DB installed at:", final_db_path)
+
+        # Remove ZIP file from source once processed
+        os.remove(zip_file)
+        print("ZIP removed from source:", zip_file)
+
+    else:
+        print("No ZIP file found in source folder.")
 
 if __name__ == "__main__":
     sync_data()

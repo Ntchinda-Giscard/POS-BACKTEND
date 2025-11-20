@@ -2,12 +2,15 @@ import sqlite3
 from typing import List
 from ..command.model import CommandTypeRRequest, CreateCommandRequest
 import uuid
+from ...database.sync_data import sync_data_new
 
 def get_command_types() -> List[CommandTypeRRequest]:
     """Fetch command types from the database."""
-    result = []
 
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
+    result = []
     cursor = sqlite_conn.cursor()
     cursor.execute("SELECT SOHTYP_0, TSODES_0 FROM TABSOHTYP")
 
@@ -71,7 +74,9 @@ def create_commande(inputs: CreateCommandRequest):
             (?, ?, ?, ?, ?)
         """
     
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
 
     # sohnnum = str(uuid.uuid4())[:8]  # Generate a unique order number

@@ -1,12 +1,14 @@
 import sqlite3
 from typing import List
 from ..addresse.model import AddressInput, AddressLivrasonREsponse, AddressRequest
+from ...database.sync_data import sync_data_new
 
 def get_adresse_vente() -> List[AddressRequest]:
     """  """
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
     result = []
-    
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
     cursor = sqlite_conn.cursor()
     cursor.execute("SELECT FCY_0, FCYNAM_0, LEGCPY_0 FROM FACILITY ORDER BY FCY_0 ASC")
 
@@ -23,10 +25,12 @@ def get_adresse_vente() -> List[AddressRequest]:
 
 def get_adresse_livraison(code_clinet: str) -> List[AddressLivrasonREsponse]:
     """Fetch delivery addresses from the database."""
-    result = []
 
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
+    result = []
     cursor.execute("""SELECT BPAADD_0 FROM "BPADDRESS" WHERE "BPANUM_0" = ? """, (code_clinet,))
 
     for row in cursor.fetchall():
@@ -39,9 +43,11 @@ def get_adresse_livraison(code_clinet: str) -> List[AddressLivrasonREsponse]:
 
 def get_adresse_expedition(legacy_comp: str) -> List[AddressRequest]:
     """  """
-    result = []
     
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
+    db_path = ""
+    db_path = sync_data_new()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
+    result = []
     cursor = sqlite_conn.cursor()
     cursor.execute("""
                    SELECT

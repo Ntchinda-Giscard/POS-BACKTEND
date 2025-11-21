@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
 from ..pricing.model import PricingInput, PricingOutput
-from database.sync_data import sync_data_new
+from database.sync_data import get_db_file
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -1185,7 +1185,7 @@ def test_pricing_engine_complete(input_contexts: List[PricingInput]) -> List[Pri
     print("=== Complete Sage X3 Pricing Engine Test ===\n")
     # db_path = "sagex3_seed.db"
     db_path = ""
-    db_path = sync_data_new()
+    db_path = get_db_file()
     
     with SageX3PricingEngine(db_path) as engine: # type: ignore
         # Test multiple contexts

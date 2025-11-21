@@ -1,13 +1,13 @@
 import sqlite3
 from .model import CondFacResponse, Escomte, PayementMode, ElementFacturation
 from typing import List
-from database.sync_data import sync_data_new
+from database.sync_data import get_db_file
 
 def get_payment_methode(customer_code: str) -> PayementMode:
     """  """
 
     db_path = ""
-    db_path = sync_data_new()
+    db_path = get_db_file()
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
     cursor.execute("SELECT  PTE_0 FROM BPCUSTOMER WHERE BPCNUM_0 = ?", (customer_code, ))
@@ -19,7 +19,7 @@ def get_payment_methode(customer_code: str) -> PayementMode:
 def get_escomte(customer_code: str) -> Escomte:
 
     db_path = ""
-    db_path = sync_data_new()
+    db_path = get_db_file()
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
 
     cursor = sqlite_conn.cursor()
@@ -32,7 +32,7 @@ def get_escomte(customer_code: str) -> Escomte:
 def get_cond_fac(customer_code: str) -> CondFacResponse:
 
     db_path = ""
-    db_path = sync_data_new()
+    db_path = get_db_file()
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
 
@@ -45,7 +45,7 @@ def get_cond_fac(customer_code: str) -> CondFacResponse:
 def get_element_facturation(customer_code: str) -> List[ElementFacturation]:
 
     db_path = ""
-    db_path = sync_data_new()
+    db_path = get_db_file()
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     result = []
     cursor = sqlite_conn.cursor()

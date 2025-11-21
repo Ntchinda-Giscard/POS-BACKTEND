@@ -4,13 +4,13 @@ import sqlite3
 from typing import List
 from unittest import result
 from ..taxe.model import AppliedTaxInput, AppliedTaxResponse, TaxeResponse
-from database.sync_data import sync_data_new
+from database.sync_data import get_db_file
 
 def get_regime_taxe(customer_code: str) -> TaxeResponse:
     """Fetch tax regime from the database."""
     # Simulated database fetch
     db_path = ""
-    db_path = sync_data_new()
+    db_path = get_db_file()
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor() 
     cursor.execute("""
@@ -28,7 +28,9 @@ def get_regime_taxe(customer_code: str) -> TaxeResponse:
 def get_niveau_taxe_article(item_code: str) -> str:
     """Fetch tax level from the database."""
     # Simulated database fetch
-    sqlite3_conn = sqlite3.connect("sagex3_seed.db")
+    db_path = ""
+    db_path = get_db_file()
+    sqlite3_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite3_conn.cursor() 
     cursor.execute("""
         SELECT
@@ -45,7 +47,9 @@ def get_niveau_taxe_article(item_code: str) -> str:
 def get_legislation(regime_taxe_tiers: str) -> str:
     """Fetch legislation from the database."""
     # Simulated database fetch
-    sqlite3_conn = sqlite3.connect("sagex3_seed.db")
+    db_path = ""
+    db_path = get_db_file()
+    sqlite3_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite3_conn.cursor() 
     cursor.execute("""
         SELECT
@@ -65,8 +69,10 @@ def get_applied_tax(criterias: List[AppliedTaxInput]) -> List[AppliedTaxResponse
 
     results = []
 
-    sqlite_conn = sqlite3.connect("sagex3_seed.db")
-    cursor = sqlite_conn.cursor()
+    db_path = ""
+    db_path = get_db_file()
+    sqlite3_conn = sqlite3.connect(db_path) # type: ignore
+    cursor = sqlite3_conn.cursor()
     determinateur = DeterminationTaxe(cursor)
     for criteria in criterias:
         niveau_taxe_article = get_niveau_taxe_article(criteria.item_code)

@@ -2,13 +2,13 @@ import sqlite3
 from typing import List
 from ..command.model import CommandTypeRRequest, CreateCommandRequest
 import uuid
-from database.sync_data import sync_data_new
+from database.sync_data import get_db_file
 
 def get_command_types() -> List[CommandTypeRRequest]:
     """Fetch command types from the database."""
 
     db_path = ""
-    db_path = sync_data_new()
+    db_path = get_db_file()
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     result = []
     cursor = sqlite_conn.cursor()
@@ -75,7 +75,7 @@ def create_commande(inputs: CreateCommandRequest):
         """
     
     db_path = ""
-    db_path = sync_data_new()
+    db_path = get_db_file()
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
 

@@ -1,11 +1,11 @@
 import sqlite3
 from typing import List
 from ..addresse.model import AddressInput, AddressLivrasonREsponse, AddressRequest
-from database.sync_data import sync_data_new
+from database.sync_data import get_db_file
 def get_adresse_vente() -> List[AddressRequest]:
     """  """
     db_path = ""
-    db_path = sync_data_new()
+    db_path = get_db_file()
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     result = []
     cursor = sqlite_conn.cursor()
@@ -26,7 +26,7 @@ def get_adresse_livraison(code_clinet: str) -> List[AddressLivrasonREsponse]:
     """Fetch delivery addresses from the database."""
 
     db_path = ""
-    db_path = sync_data_new()
+    db_path = get_db_file()
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
     result = []
@@ -44,7 +44,7 @@ def get_adresse_expedition(legacy_comp: str) -> List[AddressRequest]:
     """  """
     
     db_path = ""
-    db_path = sync_data_new()
+    db_path = get_db_file()
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     result = []
     cursor = sqlite_conn.cursor()

@@ -17,33 +17,33 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# async def periodic_sync():
-#     """Run sync_data immediately at startup and then every 15 minutes."""
-#     while True:
-#         try:
-#             logger.info("🔄 Running sync_data() ...")
-#             await asyncio.to_thread(sync_data_new)  # run blocking code safely
-#             logger.info("✅ sync_data completed.")
-#         except Exception as e:
-#             logger.error(f"❌ Error in periodic sync: {e}")
-#         await asyncio.sleep(60 * 15)  # wait 15 minutes before next run
+async def periodic_sync():
+    """Run sync_data immediately at startup and then every 15 minutes."""
+    while True:
+        try:
+            logger.info("🔄 Running sync_data() ...")
+            await asyncio.to_thread(sync_data_new)  # run blocking code safely
+            logger.info("✅ sync_data completed.")
+        except Exception as e:
+            logger.error(f"❌ Error in periodic sync: {e}")
+        await asyncio.sleep(60 * 15)  # wait 15 minutes before next run
 
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     # Startup: create background task
-#     task = asyncio.create_task(periodic_sync())
-#     logger.info("🚀 Background sync started.")
-#     yield
-#     # Shutdown: cancel background task
-#     task.cancel()
-#     try:
-#         await task
-#     except asyncio.CancelledError:
-#         logger.error("🛑 Background sync stopped gracefully.")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: create background task
+    task = asyncio.create_task(periodic_sync())
+    logger.info("🚀 Background sync started.")
+    yield
+    # Shutdown: cancel background task
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        logger.error("🛑 Background sync stopped gracefully.")
 
 
 app = FastAPI(
-    # lifespan=lifespan
+    lifespan=lifespan
     )
 
 # sync_data()
@@ -72,12 +72,12 @@ app.include_router(pricing_router)
 def read_root():
     return {"API_CHECK": "UP and Running"}
 
-# sync_lock = asyncio.Lock()
-# @app.post("/synchronize")
-# async def sync_endpoint():
-#     async with sync_lock:
-#         await asyncio.to_thread(sync_data_new)
-#     return {"status": "ok"}
+sync_lock = asyncio.Lock()
+@app.post("/synchronize")
+async def sync_endpoint():
+    async with sync_lock:
+        await asyncio.to_thread(sync_data_new)
+    return {"status": "ok"}
     
 
 if __name__ == "__main__":

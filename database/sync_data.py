@@ -97,11 +97,21 @@ def sync_data_new():
 
 import os
 
-def get_db_file(folder_path):
+def get_db_file():
     """
     Returns the full path of the .db file in the folder.
     If no .db file exists, returns None.
     """
+    db_path = r"c:/posdatabase/config.db"
+    folder_conn = sqlite3.connect(db_path)
+    folder_cursor = folder_conn.cursor()
+    folder_cursor.execute("SELECT * FROM configurations_folders")
+    folder_rows = folder_cursor.fetchone()
+    folder_conn.close()
+
+    source_folder = folder_rows[1]
+    destination_folder = folder_rows[2]
+    folder_path = destination_folder
     if not os.path.isdir(folder_path):
         return None
 

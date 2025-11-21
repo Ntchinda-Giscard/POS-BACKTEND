@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from database.sync_data import sync_data, sync_data_new
+from database.sync_data import sync_data_new
 from src.articles.controller import router as article_router
 from src.addresse.controller import router as address_router
 from src.command.controller import router as command_router
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 #     while True:
 #         try:
 #             logger.info("🔄 Running sync_data() ...")
-#             await asyncio.to_thread(sync_data)  # run blocking code safely
+#             await asyncio.to_thread(sync_data_new)  # run blocking code safely
 #             logger.info("✅ sync_data completed.")
 #         except Exception as e:
 #             logger.error(f"❌ Error in periodic sync: {e}")
@@ -76,7 +76,7 @@ def read_root():
 # @app.post("/synchronize")
 # async def sync_endpoint():
 #     async with sync_lock:
-#         await asyncio.to_thread(sync_data)
+#         await asyncio.to_thread(sync_data_new)
 #     return {"status": "ok"}
     
 

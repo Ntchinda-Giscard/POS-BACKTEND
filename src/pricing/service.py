@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
 from ..pricing.model import PricingInput, PricingOutput
-from ...database.sync_data import sync_data_new
+from database.sync_data import sync_data_new
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

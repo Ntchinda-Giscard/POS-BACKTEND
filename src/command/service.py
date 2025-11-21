@@ -2,7 +2,7 @@ import sqlite3
 from typing import List
 from ..command.model import CommandTypeRRequest, CreateCommandRequest
 import uuid
-from ...database.sync_data import sync_data_new
+from database.sync_data import sync_data_new
 
 def get_command_types() -> List[CommandTypeRRequest]:
     """Fetch command types from the database."""

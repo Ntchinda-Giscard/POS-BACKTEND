@@ -4,8 +4,7 @@ import sqlite3
 from typing import List
 from unittest import result
 from ..taxe.model import AppliedTaxInput, AppliedTaxResponse, TaxeResponse
-from ...database.sync_data import sync_data_new
-
+from database.sync_data import sync_data_new
 
 def get_regime_taxe(customer_code: str) -> TaxeResponse:
     """Fetch tax regime from the database."""

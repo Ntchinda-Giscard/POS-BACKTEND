@@ -166,14 +166,14 @@ def sync_data_new():
         print("ZIP found:", zip_file)
 
         extracted_db = extract_zip(zip_file, source_folder)
-        print("Extracted DB:", extracted_db)
+        logger.info("Extracted DB:", extracted_db)
 
         # Clean destination (remove old DB)
         clean_destination(destination_folder)
 
         # Move new DB to destination
         final_db_path = move_db(extracted_db, destination_folder)
-        print("New DB installed at:", final_db_path)
+        logging.info(f"Extracted DB: {final_db_path}")
 
         # Remove ZIP file from source once processed
         # os.remove(zip_file)
@@ -182,7 +182,7 @@ def sync_data_new():
         return final_db_path
 
     else:
-        print("No ZIP file found in source folder.")
+        logger.info("No ZIP file found in source folder.")
 
 if __name__ == "__main__":
     sync_data()

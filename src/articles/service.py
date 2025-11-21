@@ -1,8 +1,7 @@
 import sqlite3
 from typing import Dict, List
 import base64
-from ...database.sync_data import sync_data_new
-
+from database.sync_data import sync_data_new
 # from src.articles.model import ArticleInput
 
 from ..articles.model import ArticleInput, ArticleRequest

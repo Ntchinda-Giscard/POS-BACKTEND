@@ -1,6 +1,6 @@
 import sqlite3
 from ..currency.model import CurrencyResponse
-from ...database.sync_data import sync_data_new
+from database.sync_data import sync_data_new
 
 def get_commande_currrency(customer_code: str) -> CurrencyResponse:
 

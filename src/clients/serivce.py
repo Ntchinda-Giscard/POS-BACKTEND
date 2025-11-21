@@ -2,7 +2,7 @@ import sqlite3
 from typing import List
 from unittest import result
 from ..clients.model import ClientFactureResponse, ClientResponse, TierResponse
-from ...database.sync_data import sync_data_new
+from database.sync_data import sync_data_new
 
 def get_clients() -> List[ClientResponse]:
     """Fetch clients from the database."""
@@ -13,15 +13,15 @@ def get_clients() -> List[ClientResponse]:
     result = []
     cursor = sqlite_conn.cursor()
     cursor.execute("""
-SELECT
-  BPCNUM_0,
-  BPCNAM_0,
-  CUR_0,
-  IME_0
-FROM
-  BPCUSTOMER
-ORDER BY
-  BPCNUM_0 ASC""")
+            SELECT
+                BPCNUM_0,
+                BPCNAM_0,
+                CUR_0,
+                IME_0
+            FROM
+                BPCUSTOMER
+            ORDER BY
+            BPCNUM_0 ASC""")
 
     for row in cursor.fetchall():
         client = ClientResponse(

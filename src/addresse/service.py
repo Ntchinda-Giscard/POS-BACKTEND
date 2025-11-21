@@ -1,8 +1,7 @@
 import sqlite3
 from typing import List
 from ..addresse.model import AddressInput, AddressLivrasonREsponse, AddressRequest
-from ...database.sync_data import sync_data_new
-
+from database.sync_data import sync_data_new
 def get_adresse_vente() -> List[AddressRequest]:
     """  """
     db_path = ""

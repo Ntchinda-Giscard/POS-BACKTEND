@@ -2,8 +2,7 @@ from unittest import result
 from .model import ModeDeLivraisonRequest, TransPorteurResponse
 import sqlite3
 from typing import List
-from ...database.sync_data import sync_data_new
-
+from database.sync_data import sync_data_new
 
 def get_mode_livraison() -> List[ModeDeLivraisonRequest]:
 

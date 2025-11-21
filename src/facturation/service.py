@@ -1,7 +1,7 @@
 import sqlite3
 from .model import CondFacResponse, Escomte, PayementMode, ElementFacturation
 from typing import List
-from ...database.sync_data import sync_data_new
+from database.sync_data import sync_data_new
 
 def get_payment_methode(customer_code: str) -> PayementMode:
     """  """

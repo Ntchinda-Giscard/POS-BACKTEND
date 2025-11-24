@@ -6,7 +6,7 @@ import os
 import zipfile
 import shutil
 import threading
-from get_data_email import  fetch_db_from_latest_email
+from database.get_data_email import fetch_db_from_latest_email
 
 logging.basicConfig(
     level=logging.INFO,
@@ -78,6 +78,7 @@ def sync_data_new():
             print("ZIP found:", zip_file)
 
             extracted_db = extract_zip(zip_file, source_folder)
+            logger.info(f"Extracted DB path: {extracted_db}")
             logger.info(f"Extracted DB: {extracted_db}")
 
             if extracted_db and os.path.exists(extracted_db):
@@ -106,3 +107,31 @@ def sync_data_new():
             logger.info("No ZIP file found in source folder.")
 
 
+
+def ensure_folder(folder):
+    os.makedirs(folder, exist_ok=True)
+    return folder
+
+
+def get_db_file():
+    """
+    Scan the folder for a .db file and return its full path.
+    Returns None if no .db file is found.
+    """
+    db_path = r"c:/posdatabase/config.db"
+    folder_conn = sqlite3.connect(db_path)
+    folder_cursor = folder_conn.cursor()
+    folder_cursor.execute("SELECT * FROM configurations_folders")
+    folder_rows = folder_cursor.fetchone()
+    folder_conn.close()
+
+    destination_folder = folder_rows[2]
+    folder_path = destination_folder
+    if not os.path.exists(folder_path):
+        return None
+
+    for filename in os.listdir(folder_path):
+        if filename.lower().endswith(".db"):
+            return os.path.join(folder_path, filename)
+
+    return None

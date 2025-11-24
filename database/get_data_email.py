@@ -1,101 +1,265 @@
-import imaplib
-import email
-import os
-import zipfile
-import shutil
-import sqlite3
+# import imaplib
+# import email
+# import os
+# import zipfile
+# import shutil
+# import sqlite3
+
+# import poplib
+# from email import parser
+
+# POP_SERVER = "pop.gmail.com"
+# POP_PORT = 995
+# EMAIL_USER = "giscardntchinda@email.com"
+# EMAIL_PASS = "iaju sgdx tatv qwth"
+
+# # SAVE_DIR = r"C:\temp\incoming_zip"      
+# # DEST_DIR = r"C:\db_storage"
+
+
+# def get_latest_mail():
+#     pop_conn = poplib.POP3_SSL(POP_SERVER, POP_PORT)
+#     pop_conn.user(EMAIL_USER)
+#     pop_conn.pass_(EMAIL_PASS)
+
+#     num_messages = len(pop_conn.list()[1])
+#     print("Total messages:", num_messages)
+
+#     # download the last / newest email
+#     raw_email = b"\n".join(pop_conn.retr(num_messages)[1])
+#     pop_conn.quit()
+
+#     return parser.Parser().parsestr(raw_email.decode("utf-8", errors="ignore"))
+
+
+# def extract_zip_from_email(email_msg):
+#     db_path = r"c:/posdatabase/config.db"
+#     folder_conn = sqlite3.connect(db_path)
+#     folder_cursor = folder_conn.cursor()
+#     folder_cursor.execute("SELECT * FROM configurations_folders")
+#     folder_rows = folder_cursor.fetchone()
+#     folder_conn.close()
+
+#     DEST_DIR = folder_rows[2]
+
+#     SAVE_DIR = r"C:\posSave\incoming_zip"
+#     os.makedirs(SAVE_DIR, exist_ok=True)
+#     if not os.path.exists(SAVE_DIR):
+#         os.makedirs(SAVE_DIR)
+
+#     for part in email_msg.walk():
+#         if part.get_content_maintype() == 'multipart':
+#             continue
+
+#         if part.get("Content-Disposition") is None:
+#             continue
+
+#         filename = part.get_filename()
+#         if filename and filename.endswith(".zip"):
+#             file_path = os.path.join(SAVE_DIR, filename)
+#             with open(file_path, "wb") as f:
+#                 f.write(part.get_payload(decode=True))
+#             print("Saved ZIP:", file_path)
+#             return file_path
+
+#     return None
+
+# def fetch_db_from_email():
+    # db_path = r"c:/posdatabase/config.db"
+    # folder_conn = sqlite3.connect(db_path)
+    # folder_cursor = folder_conn.cursor()
+    # folder_cursor.execute("SELECT * FROM configurations_folders")
+    # folder_rows = folder_cursor.fetchone()
+    # folder_conn.close()
+
+    # DEST_DIR = folder_rows[2]
+
+#     msg = get_latest_mail()
+
+#     zip_path = extract_zip_from_email(msg)
+#     if not zip_path:
+#         print("No zip found in email.")
+#         return None
+
+#     extracted_db = extract_zip(zip_path, SAVE_DIR)
+#     if not extracted_db:
+#         print("No DB found inside ZIP.")
+#         return None
+
+#     clean_destination(DEST_DIR)
+#     final_path = move_db(extracted_db, DEST_DIR)
+#     os.remove(zip_path)
+
+#     return final_path
+
+
+
 
 import poplib
+import os
+import time
+import zipfile
+import shutil
 from email import parser
+from email import policy
+import sqlite3
 
-POP_SERVER = "pop.gmail.com"
+
+# ---------- CONFIG ----------
+POP_SERVER = "pop.gmail.com"   # change if needed
 POP_PORT = 995
 EMAIL_USER = "giscardntchinda@email.com"
 EMAIL_PASS = "iaju sgdx tatv qwth"
 
-# SAVE_DIR = r"C:\temp\incoming_zip"      
-# DEST_DIR = r"C:\db_storage"
+TEMP_DIR = r"C:\temp\incoming_zip"   # temporary storage for zip + extraction
+# DEST_DIR = r"E:\original"            # destination folder where only one .db must exist
 
+# ---------- UTIL ----------
 
-def get_latest_mail():
-    pop_conn = poplib.POP3_SSL(POP_SERVER, POP_PORT)
-    pop_conn.user(EMAIL_USER)
-    pop_conn.pass_(EMAIL_PASS)
+def ensure_folder(path):
+    os.makedirs(path, exist_ok=True)
+    return path
 
-    num_messages = len(pop_conn.list()[1])
-    print("Total messages:", num_messages)
+def wait_until_file_free(path, timeout=10, poll=0.25):
+    """
+    Wait until a file can be opened for reading (not locked).
+    Returns True if file is free within timeout, else False.
+    """
+    start = time.time()
+    while time.time() - start < timeout:
+        try:
+            with open(path, "rb"):
+                return True
+        except (PermissionError, OSError):
+            time.sleep(poll)
+    return False
 
-    # download the last / newest email
-    raw_email = b"\n".join(pop_conn.retr(num_messages)[1])
-    pop_conn.quit()
+# ---------- DB file helpers ----------
 
-    return parser.Parser().parsestr(raw_email.decode("utf-8", errors="ignore"))
+def clean_destination(folder):
+    """
+    Remove all .db files from 'folder'. Creates the folder if missing.
+    """
+    ensure_folder(folder)
+    for filename in os.listdir(folder):
+        if filename.lower().endswith(".db"):
+            path = os.path.join(folder, filename)
+            try:
+                os.remove(path)
+            except PermissionError:
+                # Try waiting a bit and retry once
+                if wait_until_file_free(path, timeout=5):
+                    try:
+                        os.remove(path)
+                    except Exception as e:
+                        print(f"Failed to remove locked DB {path}: {e}")
+                else:
+                    print(f"Could not remove locked DB {path}")
+
+def move_db(src_path, destination_folder, retries=5, delay=0.5):
+    """
+    Move src_path (a .db file) into destination_folder.
+    Retries a few times on PermissionError (Windows).
+    Returns path to moved file on success, else raises.
+    """
+    ensure_folder(destination_folder)
+    final_path = os.path.join(destination_folder, os.path.basename(src_path))
+
+    for attempt in range(1, retries + 1):
+        try:
+            # Use shutil.move (will move across filesystems)
+            shutil.move(src_path, final_path)
+            return final_path
+        except PermissionError as e:
+            print(f"PermissionError moving DB (attempt {attempt}/{retries}): {e}")
+            time.sleep(delay)
+        except FileNotFoundError as e:
+            # Source disappeared; nothing to move
+            raise
+    # final attempt: try copy + remove (may still fail)
+    try:
+        shutil.copy2(src_path, final_path)
+        os.remove(src_path)
+        return final_path
+    except Exception as e:
+        raise RuntimeError(f"Failed to move DB after retries: {e}")
+
 def extract_zip(zip_path, extract_to):
+    """
+    Extract zip_path into extract_to and return the first .db found (full path),
+    or None if no .db inside.
+    """
+    ensure_folder(extract_to)
     with zipfile.ZipFile(zip_path, "r") as z:
         z.extractall(extract_to)
         for name in z.namelist():
-            if name.endswith(".db"):
+            if name.lower().endswith(".db"):
+                # If the ZIP contains directories, normalize the path
                 return os.path.join(extract_to, name)
     return None
 
-def move_db(db_path, destination_folder):
-    final_path = os.path.join(destination_folder, os.path.basename(db_path))
-    shutil.move(db_path, final_path)
-    return final_path
+# ---------- POP3 + email helpers ----------
 
+def get_latest_mail():
+    """
+    Connect to POP3 server and return the parsed latest email message (email.message.Message).
+    Returns None if there are no emails.
+    """
+    pop_conn = poplib.POP3_SSL(POP_SERVER, POP_PORT, timeout=30)
+    pop_conn.user(EMAIL_USER)
+    pop_conn.pass_(EMAIL_PASS)
 
-def download_latest_zip():
-    SAVE_DIR = r"C:\posSave\incoming_zip"
-    os.makedirs(SAVE_DIR, exist_ok=True)
-    if not os.path.exists(SAVE_DIR):
-        os.makedirs(SAVE_DIR)
-
-    # Connect to IMAP
-    mail = imaplib.IMAP4_SSL(IMAP_SERVER)
-    mail.login(EMAIL_USER, EMAIL_PASS)
-    mail.select("INBOX")
-
-    # Search all emails
-    result, data = mail.search(None, "ALL")
-    mail_ids = data[0].split()
-
-    if not mail_ids:
-        print("No emails found.")
+    # Get number of messages
+    resp, items, octets = pop_conn.list()
+    if not items:
+        pop_conn.quit()
         return None
-    
-    latest_id = mail_ids[-1]  # last email is the newest
-    result, msg_data = mail.fetch(latest_id, "(RFC822)")
 
-    raw_email = msg_data[0][1] # type: ignore
-    msg = email.message_from_bytes(raw_email) # type: ignore
+    num_messages = len(items)
+    # Retrieve the last (newest) message
+    resp, lines, octets = pop_conn.retr(num_messages)
+    raw_message = b"\r\n".join(lines)
+    pop_conn.quit()
 
-    # Look for attachments
+    # Parse using the default policy to handle bytes properly
+    return parser.BytesParser(policy=policy.default).parsebytes(raw_message)
+
+def extract_zip_from_email(msg, save_dir):
+    """
+    Walk email message and store the first .zip attachment in save_dir.
+    Returns path to saved zip or None.
+    """
+    ensure_folder(save_dir)
     for part in msg.walk():
-        if part.get_content_maintype() == "multipart":
+        if part.is_multipart():
             continue
-
-        if part.get("Content-Disposition") is None:
+        disp = part.get("Content-Disposition", "")
+        if not disp:
             continue
-
         filename = part.get_filename()
-        if filename and filename.endswith(".zip"):
-            zip_path = os.path.join(SAVE_DIR, filename)
-            with open(zip_path, "wb") as f:
-                payload = part.get_payload(decode=True)
-                if payload is None:
-                    # no payload to write, skip this part
-                    continue
-                if isinstance(payload, str):
-                    payload = payload.encode()
-                elif not isinstance(payload, bytes):
-                    payload = bytes(payload)
-                f.write(payload)
-            return zip_path
-
+        if not filename:
+            continue
+        filename = filename.strip()
+        if filename.lower().endswith(".zip"):
+            save_path = os.path.join(save_dir, filename)
+            payload = part.get_payload(decode=True)
+            with open(save_path, "wb") as fh:
+                fh.write(payload)
+            return save_path
     return None
 
+# ---------- Main pipeline ----------
 
-def process_latest_backup():
+def fetch_db_from_latest_email():
+    """
+    Entire pipeline:
+    - fetch latest email via POP3
+    - find .zip attachment and save it
+    - extract .db from zip
+    - clean destination folder (remove old .db files)
+    - move new .db into destination
+    Returns final DB path or None.
+    """
     db_path = r"c:/posdatabase/config.db"
     folder_conn = sqlite3.connect(db_path)
     folder_cursor = folder_conn.cursor()
@@ -105,33 +269,71 @@ def process_latest_backup():
 
     DEST_DIR = folder_rows[2]
 
-    SAVE_DIR = r"C:\posSave\incoming_zip"
-    os.makedirs(SAVE_DIR, exist_ok=True)
-    
-    zip_file = download_latest_zip()
+    ensure_folder(TEMP_DIR)
+    ensure_folder(DEST_DIR)
 
-    if not zip_file:
-        print("No ZIP attachment found.")
+    print("Connecting to POP3 and fetching latest email...")
+    msg = get_latest_mail()
+    if msg is None:
+        print("No emails found.")
         return None
 
-    print("ZIP downloaded:", zip_file)
-
-    # Extract the DB
-    extracted_db = extract_zip(zip_file, SAVE_DIR)
-    if not extracted_db:
-        print("No DB found inside ZIP.")
+    print("Searching for ZIP attachment...")
+    zip_path = extract_zip_from_email(msg, TEMP_DIR)
+    if not zip_path:
+        print("No ZIP attachment found in latest email.")
         return None
 
-    print("Extracted DB:", extracted_db)
+    print("ZIP downloaded to:", zip_path)
 
-    # Remove old DB in destination
+    print("Extracting ZIP...")
+    extracted_db = extract_zip(zip_path, TEMP_DIR)
+    if not extracted_db or not os.path.exists(extracted_db):
+        print("No .db found inside ZIP.")
+        # cleanup zip if desired
+        try:
+            os.remove(zip_path)
+        except Exception:
+            pass
+        return None
+
+    # Normalize path (zip may contain folder structure)
+    extracted_db = os.path.normpath(extracted_db)
+    print("Extracted DB path:", extracted_db)
+
+    # Wait until the extracted DB file is free (not locked)
+    if not wait_until_file_free(extracted_db, timeout=10):
+        print("Warning: extracted DB may be locked. Proceeding to attempt move anyway.")
+
+    # Clean existing DBs in destination
+    print("Cleaning destination folder:", DEST_DIR)
     clean_destination(DEST_DIR)
 
     # Move the new DB into destination
-    final_db = move_db(extracted_db, DEST_DIR)
-    print("New DB installed at:", final_db)
+    print("Moving DB to destination...")
+    try:
+        final_db = move_db(extracted_db, DEST_DIR)
+    except FileNotFoundError:
+        print("Extracted .db not found when attempting to move (race condition).")
+        final_db = None
+    except Exception as e:
+        print("Failed to move DB:", e)
+        final_db = None
 
-    # Remove ZIP after processing
-    os.remove(zip_file)
+    # Remove zip file
+    try:
+        os.remove(zip_path)
+    except Exception:
+        pass
+
+    if final_db:
+        print("New DB installed at:", final_db)
+    else:
+        print("DB installation failed.")
 
     return final_db
+
+# ---------- If run as script ----------
+if __name__ == "__main__":
+    result = fetch_db_from_latest_email()
+    print("Result:", result)

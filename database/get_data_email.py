@@ -103,16 +103,55 @@ def extract_zip(zip_path, extract_to):
 
 
 def email_contains_zip(msg):
+    """
+    Check if email contains a ZIP attachment.
+    Now with detailed debugging and more thorough detection.
+    """
+    print("  → Scanning email parts for ZIP...")
+    has_zip = False
+    
     for part in msg.walk():
         if part.is_multipart():
             continue
+        
         filename = part.get_filename()
         content_type = part.get_content_type()
+        content_disposition = part.get("Content-Disposition", "")
+        
+        # Debug: Show what we found
+        print(f"    Part: type={content_type}, filename={filename}, disposition={content_disposition[:50] if content_disposition else 'None'}")
+        
+        # Check 1: Filename ends with .zip
         if filename and filename.lower().endswith(".zip"):
-            return True
-        if content_type in ["application/zip", "application/octet-stream"]:
-            return True
-    return False
+            print(f"    ✓ Found ZIP by filename: {filename}")
+            has_zip = True
+            
+        # Check 2: Content type is explicitly application/zip
+        elif content_type == "application/zip":
+            print(f"    ✓ Found ZIP by content-type: application/zip")
+            has_zip = True
+            
+        # Check 3: octet-stream with .zip filename
+        elif content_type == "application/octet-stream" and filename:
+            if filename.lower().endswith(".zip"):
+                print(f"    ✓ Found ZIP in octet-stream: {filename}")
+                has_zip = True
+            else:
+                print(f"    ⚠ octet-stream but not .zip: {filename}")
+                
+        # Check 4: Try to detect zip by magic bytes (ZIP files start with 'PK')
+        elif content_type == "application/octet-stream" or "attachment" in content_disposition.lower():
+            try:
+                payload = part.get_payload(decode=True)
+                if payload and len(payload) > 4:
+                    # Check for ZIP magic bytes: 'PK\x03\x04' or 'PK\x05\x06'
+                    if payload[:2] == b'PK':
+                        print(f"    ✓ Found ZIP by magic bytes (PK signature)")
+                        has_zip = True
+            except Exception as e:
+                print(f"    ⚠ Error checking payload: {e}")
+    
+    return has_zip
 
 # ---------- POP3 + email helpers ----------
 
@@ -131,18 +170,26 @@ def get_latest_mail_with_zip():
 
     # Iterate from most recent backwards
     for i in range(total, 0, -1):
-        print(f"Checking email #{i} ...")
+        print(f"\nChecking email #{i} ...")
 
         resp, lines, octets = pop_conn.retr(i)
         raw_message = b"\r\n".join(lines)
         msg = parser.BytesParser(policy=policy.default).parsebytes(raw_message)
 
+        subject = msg.get("Subject", "No Subject")
+        from_addr = msg.get("From", "Unknown")
+        print(f"  Subject: {subject}")
+        print(f"  From: {from_addr}")
+
         # does this email contain a ZIP?
         if email_contains_zip(msg):
-            print(f"Found ZIP in message #{i}")
+            print(f"✓ Found ZIP in message #{i}")
             pop_conn.quit()
             return msg
+        else:
+            print(f"✗ No ZIP found in message #{i}")
 
+    print("\n⚠ No emails with ZIP attachments found!")
     pop_conn.quit()
     return None
 
@@ -185,6 +232,19 @@ def extract_zip_from_email(msg, save_dir):
             with open(save_path, "wb") as fh:
                 fh.write(part.get_payload(decode=True))
             return save_path
+        
+        payload = part.get_payload(decode=True)
+        if payload and len(payload) > 4 and payload[:2] == b'PK':
+            # This looks like a ZIP file
+            if filename:
+                save_path = os.path.join(save_dir, filename)
+            else:
+                save_path = os.path.join(save_dir, "backup.zip")
+            
+            with open(save_path, "wb") as fh:
+                fh.write(payload)
+            print(f"DEBUG → Saved ZIP detected by magic bytes: {save_path}")
+            return save_path
 
     return None
 
@@ -215,10 +275,10 @@ def fetch_db_from_latest_email():
     print("Connecting to POP3 and fetching latest email...")
     msg = get_latest_mail_with_zip()
     if msg is None:
-        print("No emails found.")
+        print("No emails found with ZIP attachments.")
         return None
 
-    print("Searching for ZIP attachment...")
+    print("\nSearching for ZIP attachment...")
     zip_path = extract_zip_from_email(msg, TEMP_DIR)
     if not zip_path:
         print("No ZIP attachment found in latest email.")

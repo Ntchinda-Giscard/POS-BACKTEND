@@ -6,7 +6,7 @@ import os
 import zipfile
 import shutil
 import threading
-from get_data_email import process_latest_backup
+from get_data_email import  fetch_db_from_latest_email
 
 logging.basicConfig(
     level=logging.INFO,
@@ -66,6 +66,8 @@ def sync_data_new():
         source_folder = folder_rows[1]
         destination_folder = folder_rows[2]
 
+        final_db_path = None
+
         # -----------------------
         # MAIN LOGIC
         # -----------------------
@@ -94,7 +96,8 @@ def sync_data_new():
                     return final_db_path
                 except Exception as e:
                     logger.error(f"Error moving database: {e}")
-                    return None
+                    final_db_path = fetch_db_from_latest_email()
+                    return final_db_path
             else:
                 logger.warning("Extracted DB file not found (possibly moved by another process).")
                 return None
@@ -103,42 +106,3 @@ def sync_data_new():
             logger.info("No ZIP file found in source folder.")
 
 
-import os
-
-def get_db_file():
-    """
-    Returns the full path of the .db file in the folder.
-    If no .db file exists, returns None.
-    """
-    db_path = r"c:/posdatabase/config.db"
-    folder_conn = sqlite3.connect(db_path)
-    folder_cursor = folder_conn.cursor()
-    folder_cursor.execute("SELECT * FROM configurations_folders")
-    folder_rows = folder_cursor.fetchone()
-    folder_conn.close()
-
-    source_folder = folder_rows[1]
-    destination_folder = folder_rows[2]
-    folder_path = destination_folder
-    if not os.path.isdir(folder_path):
-        return None
-    
-    # try:
-    database_path = process_latest_backup()
-    print("Database path from backup process from email:", database_path)
-    return database_path
-    # except Exception as e:
-    #     logger.error(f"Error processing latest backup: {e}")
-
-        # for filename in os.listdir(folder_path):
-        #     if filename.lower().endswith(".db"):
-        #         file_path = os.path.join(folder_path, filename)
-        #         print("Database file found:", file_path)
-        #         return file_path
-
-    # return None
-
-
-if __name__ == "__main__":
-    datapath = get_db_file()
-    print("Database file path:", datapath)

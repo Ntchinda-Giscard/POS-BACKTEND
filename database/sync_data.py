@@ -6,9 +6,16 @@ import os
 import zipfile
 import shutil
 import threading
-from .get_data_email import process_latest_backup
+from get_data_email import process_latest_backup
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s - %(name)s - %(funcName)s - %(lineno)d - %(threadName)s',
+    handlers=[
+        logging.FileHandler('fastapi.log')
+    ]
+)
+# logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 _sync_lock = threading.Lock()
@@ -116,13 +123,22 @@ def get_db_file():
     if not os.path.isdir(folder_path):
         return None
     
-    try:
-        database_path = process_latest_backup()
-    except Exception as e:
-        logger.error(f"Error processing latest backup: {e}")
+    # try:
+    database_path = process_latest_backup()
+    print("Database path from backup process from email:", database_path)
+    return database_path
+    # except Exception as e:
+    #     logger.error(f"Error processing latest backup: {e}")
 
-        for filename in os.listdir(folder_path):
-            if filename.lower().endswith(".db"):
-                return os.path.join(folder_path, filename)
+        # for filename in os.listdir(folder_path):
+        #     if filename.lower().endswith(".db"):
+        #         file_path = os.path.join(folder_path, filename)
+        #         print("Database file found:", file_path)
+        #         return file_path
 
-    return None
+    # return None
+
+
+if __name__ == "__main__":
+    datapath = get_db_file()
+    print("Database file path:", datapath)

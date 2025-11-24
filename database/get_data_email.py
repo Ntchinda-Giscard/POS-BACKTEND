@@ -5,8 +5,11 @@ import zipfile
 import shutil
 import sqlite3
 
+import poplib
+from email import parser
 
-IMAP_SERVER = "imap.gmail.com"     # or your server
+POP_SERVER = "pop.gmail.com"
+POP_PORT = 995
 EMAIL_USER = "giscardntchinda@email.com"
 EMAIL_PASS = "iaju sgdx tatv qwth"
 
@@ -14,15 +17,19 @@ EMAIL_PASS = "iaju sgdx tatv qwth"
 # DEST_DIR = r"C:\db_storage"
 
 
+def get_latest_mail():
+    pop_conn = poplib.POP3_SSL(POP_SERVER, POP_PORT)
+    pop_conn.user(EMAIL_USER)
+    pop_conn.pass_(EMAIL_PASS)
 
-def clean_destination(folder):
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    num_messages = len(pop_conn.list()[1])
+    print("Total messages:", num_messages)
 
-    for f in os.listdir(folder):
-        if f.endswith(".db"):
-            os.remove(os.path.join(folder, f))
+    # download the last / newest email
+    raw_email = b"\n".join(pop_conn.retr(num_messages)[1])
+    pop_conn.quit()
 
+    return parser.Parser().parsestr(raw_email.decode("utf-8", errors="ignore"))
 def extract_zip(zip_path, extract_to):
     with zipfile.ZipFile(zip_path, "r") as z:
         z.extractall(extract_to)

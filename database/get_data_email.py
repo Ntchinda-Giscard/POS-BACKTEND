@@ -1,100 +1,3 @@
-# import imaplib
-# import email
-# import os
-# import zipfile
-# import shutil
-# import sqlite3
-
-# import poplib
-# from email import parser
-
-# POP_SERVER = "pop.gmail.com"
-# POP_PORT = 995
-# EMAIL_USER = "giscardntchinda@email.com"
-# EMAIL_PASS = "iaju sgdx tatv qwth"
-
-# # SAVE_DIR = r"C:\temp\incoming_zip"      
-# # DEST_DIR = r"C:\db_storage"
-
-
-# def get_latest_mail():
-#     pop_conn = poplib.POP3_SSL(POP_SERVER, POP_PORT)
-#     pop_conn.user(EMAIL_USER)
-#     pop_conn.pass_(EMAIL_PASS)
-
-#     num_messages = len(pop_conn.list()[1])
-#     print("Total messages:", num_messages)
-
-#     # download the last / newest email
-#     raw_email = b"\n".join(pop_conn.retr(num_messages)[1])
-#     pop_conn.quit()
-
-#     return parser.Parser().parsestr(raw_email.decode("utf-8", errors="ignore"))
-
-
-# def extract_zip_from_email(email_msg):
-#     db_path = r"c:/posdatabase/config.db"
-#     folder_conn = sqlite3.connect(db_path)
-#     folder_cursor = folder_conn.cursor()
-#     folder_cursor.execute("SELECT * FROM configurations_folders")
-#     folder_rows = folder_cursor.fetchone()
-#     folder_conn.close()
-
-#     DEST_DIR = folder_rows[2]
-
-#     SAVE_DIR = r"C:\posSave\incoming_zip"
-#     os.makedirs(SAVE_DIR, exist_ok=True)
-#     if not os.path.exists(SAVE_DIR):
-#         os.makedirs(SAVE_DIR)
-
-#     for part in email_msg.walk():
-#         if part.get_content_maintype() == 'multipart':
-#             continue
-
-#         if part.get("Content-Disposition") is None:
-#             continue
-
-#         filename = part.get_filename()
-#         if filename and filename.endswith(".zip"):
-#             file_path = os.path.join(SAVE_DIR, filename)
-#             with open(file_path, "wb") as f:
-#                 f.write(part.get_payload(decode=True))
-#             print("Saved ZIP:", file_path)
-#             return file_path
-
-#     return None
-
-# def fetch_db_from_email():
-    # db_path = r"c:/posdatabase/config.db"
-    # folder_conn = sqlite3.connect(db_path)
-    # folder_cursor = folder_conn.cursor()
-    # folder_cursor.execute("SELECT * FROM configurations_folders")
-    # folder_rows = folder_cursor.fetchone()
-    # folder_conn.close()
-
-    # DEST_DIR = folder_rows[2]
-
-#     msg = get_latest_mail()
-
-#     zip_path = extract_zip_from_email(msg)
-#     if not zip_path:
-#         print("No zip found in email.")
-#         return None
-
-#     extracted_db = extract_zip(zip_path, SAVE_DIR)
-#     if not extracted_db:
-#         print("No DB found inside ZIP.")
-#         return None
-
-#     clean_destination(DEST_DIR)
-#     final_path = move_db(extracted_db, DEST_DIR)
-#     os.remove(zip_path)
-
-#     return final_path
-
-
-
-
 import poplib
 import os
 import time
@@ -108,8 +11,8 @@ import sqlite3
 # ---------- CONFIG ----------
 POP_SERVER = "pop.gmail.com"   # change if needed
 POP_PORT = 995
-EMAIL_USER = "giscardntchinda@email.com"
-EMAIL_PASS = "iaju sgdx tatv qwth"
+EMAIL_USER = "giscardntchinda@gmail.com"
+EMAIL_PASS = "yzeq tafx waik ihqh"
 
 TEMP_DIR = r"C:\temp\incoming_zip"   # temporary storage for zip + extraction
 # DEST_DIR = r"E:\original"            # destination folder where only one .db must exist
@@ -211,6 +114,9 @@ def get_latest_mail():
 
     # Get number of messages
     resp, items, octets = pop_conn.list()
+    print("Total messages on server:", len(items))
+    print("POP3 response:", resp)
+    print("Octets:", octets)
     if not items:
         pop_conn.quit()
         return None

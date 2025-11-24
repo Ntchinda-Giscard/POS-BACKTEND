@@ -101,34 +101,50 @@ def extract_zip(zip_path, extract_to):
                 return os.path.join(extract_to, name)
     return None
 
+
+def email_contains_zip(msg):
+    for part in msg.walk():
+        if part.is_multipart():
+            continue
+        filename = part.get_filename()
+        content_type = part.get_content_type()
+        if filename and filename.lower().endswith(".zip"):
+            return True
+        if content_type in ["application/zip", "application/octet-stream"]:
+            return True
+    return False
+
 # ---------- POP3 + email helpers ----------
 
-def get_latest_mail():
-    """
-    Connect to POP3 server and return the parsed latest email message (email.message.Message).
-    Returns None if there are no emails.
-    """
+def get_latest_mail_with_zip():
     pop_conn = poplib.POP3_SSL(POP_SERVER, POP_PORT, timeout=30)
     pop_conn.user(EMAIL_USER)
     pop_conn.pass_(EMAIL_PASS)
 
-    # Get number of messages
     resp, items, octets = pop_conn.list()
-    print("Total messages on server:", len(items))
-    print("POP3 response:", resp)
-    print("Octets:", octets)
-    if not items:
+    total = len(items)
+    print("Total messages:", total)
+
+    if total == 0:
         pop_conn.quit()
         return None
 
-    num_messages = len(items)
-    # Retrieve the last (newest) message
-    resp, lines, octets = pop_conn.retr(num_messages)
-    raw_message = b"\r\n".join(lines)
-    pop_conn.quit()
+    # Iterate from most recent backwards
+    for i in range(total, 0, -1):
+        print(f"Checking email #{i} ...")
 
-    # Parse using the default policy to handle bytes properly
-    return parser.BytesParser(policy=policy.default).parsebytes(raw_message)
+        resp, lines, octets = pop_conn.retr(i)
+        raw_message = b"\r\n".join(lines)
+        msg = parser.BytesParser(policy=policy.default).parsebytes(raw_message)
+
+        # does this email contain a ZIP?
+        if email_contains_zip(msg):
+            print(f"Found ZIP in message #{i}")
+            pop_conn.quit()
+            return msg
+
+    pop_conn.quit()
+    return None
 
 def extract_zip_from_email(msg, save_dir):
     ensure_folder(save_dir)
@@ -197,7 +213,7 @@ def fetch_db_from_latest_email():
     ensure_folder(DEST_DIR)
 
     print("Connecting to POP3 and fetching latest email...")
-    msg = get_latest_mail()
+    msg = get_latest_mail_with_zip()
     if msg is None:
         print("No emails found.")
         return None

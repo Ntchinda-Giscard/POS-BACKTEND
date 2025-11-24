@@ -131,27 +131,45 @@ def get_latest_mail():
     return parser.BytesParser(policy=policy.default).parsebytes(raw_message)
 
 def extract_zip_from_email(msg, save_dir):
-    """
-    Walk email message and store the first .zip attachment in save_dir.
-    Returns path to saved zip or None.
-    """
     ensure_folder(save_dir)
     for part in msg.walk():
         if part.is_multipart():
             continue
-        disp = part.get("Content-Disposition", "")
-        if not disp:
-            continue
+
         filename = part.get_filename()
-        if not filename:
-            continue
-        filename = filename.strip()
-        if filename.lower().endswith(".zip"):
+        content_type = part.get_content_type()
+        disp = part.get("Content-Disposition", "")
+
+        print("DEBUG → content_type:", content_type,
+              "filename:", filename,
+              "disposition:", disp)
+
+        # CASE 1: Standard attachment
+        if filename and filename.lower().endswith(".zip"):
             save_path = os.path.join(save_dir, filename)
-            payload = part.get_payload(decode=True)
             with open(save_path, "wb") as fh:
-                fh.write(payload)
+                fh.write(part.get_payload(decode=True))
             return save_path
+
+        # CASE 2: No filename but ZIP type
+        if content_type == "application/zip":
+            save_path = os.path.join(save_dir, "backup.zip")
+            with open(save_path, "wb") as fh:
+                fh.write(part.get_payload(decode=True))
+            return save_path
+
+        # CASE 3: Hidden ZIP in octet-stream
+        if content_type == "application/octet-stream":
+            # try detect filename
+            if filename:
+                save_path = os.path.join(save_dir, filename)
+            else:
+                save_path = os.path.join(save_dir, "backup.zip")
+
+            with open(save_path, "wb") as fh:
+                fh.write(part.get_payload(decode=True))
+            return save_path
+
     return None
 
 # ---------- Main pipeline ----------

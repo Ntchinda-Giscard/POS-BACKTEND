@@ -77,28 +77,34 @@ def sync_data_new():
         if zip_file:
             print("ZIP found:", zip_file)
 
-            extracted_db = extract_zip(zip_file, source_folder)
-            logger.info(f"Extracted DB path: {extracted_db}")
-            logger.info(f"Extracted DB: {extracted_db}")
+            
 
-            if extracted_db and os.path.exists(extracted_db):
-                try:
+            
+            try:
+                final_db_path = fetch_db_from_latest_email()
+                logging.info(f"Fetched DB from email: {final_db_path}")
+                
+
+                # Remove ZIP file from source once processed
+                # os.remove(zip_file)
+                # print("ZIP removed from source:", zip_file)
+
+                return final_db_path
+            except Exception as e:
+                extracted_db = extract_zip(zip_file, source_folder)
+                logger.info(f"Extracted DB path: {extracted_db}")
+                logger.info(f"Extracted DB: {extracted_db}")
+                if extracted_db and os.path.exists(extracted_db):
+                    logger.error(f"Error moving database: {e}")
+                    
                     # Clean destination (remove old DB)
                     clean_destination(destination_folder)
 
                     # Move new DB to destination
                     final_db_path = move_db(extracted_db, destination_folder)
-                    logging.info(f"Extracted DB: {final_db_path}")
-
-                    # Remove ZIP file from source once processed
-                    # os.remove(zip_file)
-                    # print("ZIP removed from source:", zip_file)
-
-                    return final_db_path
-                except Exception as e:
-                    logger.error(f"Error moving database: {e}")
-                    final_db_path = fetch_db_from_latest_email()
-                    return final_db_path
+                    logging.info(f"Extracted DB from folder: {final_db_path}")
+                    
+                return final_db_path
             else:
                 logger.warning("Extracted DB file not found (possibly moved by another process).")
                 return None

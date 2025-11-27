@@ -54,23 +54,23 @@ def wait_until_file_free(path, timeout=10, poll=0.25):
 
 def clean_destination(folder):
     """
-    Remove all .db files from 'folder'. Creates the folder if missing.
+    Remove ONLY local_data.db from 'folder'. Creates the folder if missing.
     """
     ensure_folder(folder)
-    for filename in os.listdir(folder):
-        if filename.lower().endswith(".db"):
-            path = os.path.join(folder, filename)
-            try:
-                os.remove(path)
-            except PermissionError:
-                # Try waiting a bit and retry once
-                if wait_until_file_free(path, timeout=5):
-                    try:
-                        os.remove(path)
-                    except Exception as e:
-                        logger.error(f"Failed to remove locked DB {path}: {e}")
-                else:
-                    logger.error(f"Could not remove locked DB {path}")
+    target = os.path.join(folder, "local_data.db")
+
+    if os.path.exists(target):
+        try:
+            os.remove(target)
+        except PermissionError:
+            if wait_until_file_free(target, timeout=5):
+                try:
+                    os.remove(target)
+                except Exception as e:
+                    logger.error(f"Failed to remove locked DB {target}: {e}")
+            else:
+                logger.error(f"Could not remove locked DB {target}")
+
 
 def move_db(src_path, destination_folder, retries=5, delay=0.5):
     """

@@ -120,14 +120,7 @@ def get_db_file():
     """
     
    
-
-    destination_folder = DEST_DIR
-    folder_path = destination_folder
-    if not os.path.exists(folder_path):
-        return None
-
-    for filename in os.listdir(folder_path):
-        if filename.lower().endswith(".db"):
-            return os.path.join(folder_path, filename)
-
+    db_path = os.path.join(DEST_DIR, "local_data.db")
+    if os.path.exists(db_path):
+        return db_path
     return None

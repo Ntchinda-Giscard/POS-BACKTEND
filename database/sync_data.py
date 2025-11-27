@@ -18,6 +18,9 @@ logging.basicConfig(
 # logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+BASE_FOLDER = r"C:\poswaza\temp"
+LOCAL_DB_PATH = rf"{BASE_FOLDER}\db"
+
 _sync_lock = threading.Lock()
 
 def get_single_zip(folder):
@@ -56,8 +59,8 @@ def move_db(db_file, destination_folder):
 
 def sync_data_new():
     with _sync_lock:
-        db_path = r"c:/posdatabase/config.db"
-        folder_conn = sqlite3.connect(db_path)
+        
+        folder_conn = sqlite3.connect(LOCAL_DB_PATH)
         folder_cursor = folder_conn.cursor()
         folder_cursor.execute("SELECT * FROM configurations_folders")
         folder_rows = folder_cursor.fetchone()
@@ -83,11 +86,6 @@ def sync_data_new():
         try:
             final_db_path = fetch_db_from_latest_email()
             logging.info(f"Fetched DB from email: {final_db_path}")
-            
-
-            # Remove ZIP file from source once processed
-            # os.remove(zip_file)
-            # print("ZIP removed from source:", zip_file)
 
             return final_db_path
         except Exception as e:
@@ -107,10 +105,6 @@ def sync_data_new():
                 
             return final_db_path
 
-        # else:
-        #     logger.info("No ZIP file found in source folder.")
-
-
 
 def ensure_folder(folder):
     os.makedirs(folder, exist_ok=True)
@@ -122,8 +116,8 @@ def get_db_file():
     Scan the folder for a .db file and return its full path.
     Returns None if no .db file is found.
     """
-    db_path = r"c:/posdatabase/config.db"
-    folder_conn = sqlite3.connect(db_path)
+    
+    folder_conn = sqlite3.connect(LOCAL_DB_PATH)
     folder_cursor = folder_conn.cursor()
     folder_cursor.execute("SELECT * FROM configurations_folders")
     folder_rows = folder_cursor.fetchone()

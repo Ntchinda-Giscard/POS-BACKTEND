@@ -1,3 +1,4 @@
+import sys
 from fastapi import FastAPI
 from database.sync_data import sync_data_new
 from src.articles.controller import router as article_router
@@ -14,7 +15,15 @@ from contextlib import asynccontextmanager
 import asyncio
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s - %(name)s - %(funcName)s - %(lineno)d - %(threadName)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler('fastapi.log')
+    ]
+)
+
 logger = logging.getLogger(__name__)
 
 async def periodic_sync():

@@ -3,6 +3,19 @@ from typing import List
 from ..command.model import CommandTypeRRequest, CreateCommandRequest
 import uuid
 from database.sync_data import get_db_file
+import logging
+import sys
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s - %(name)s - %(funcName)s - %(lineno)d - %(threadName)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler('fastapi.log')
+    ]
+)
+
+logger = logging.getLogger(__name__)
 
 def get_command_types() -> List[CommandTypeRRequest]:
     """Fetch command types from the database."""
@@ -15,6 +28,7 @@ def get_command_types() -> List[CommandTypeRRequest]:
     cursor.execute("SELECT SOHTYP_0, TSODES_0 FROM TABSOHTYP")
 
     for row in cursor.fetchall():
+        logger.debug(f"Fetched command type row: {row}")
         result.append(CommandTypeRRequest(code=row[0], description=row[1]))
     sqlite_conn.close()
     return result
@@ -126,7 +140,7 @@ def create_commande(inputs: CreateCommandRequest):
             line.quantity,
             line.quantity
         ))
-    
+        logger.debug(f"Inserted line item: {line.item_code} with quantity {line.quantity}")
     
     sqlite_conn.commit()
     sqlite_conn.close()

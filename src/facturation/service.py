@@ -2,7 +2,19 @@ import sqlite3
 from .model import CondFacResponse, Escomte, PayementMode, ElementFacturation
 from typing import List
 from database.sync_data import get_db_file
+import logging
+import sys
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s - %(name)s - %(funcName)s - %(lineno)d - %(threadName)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler('fastapi.log')
+    ]
+)
+
+logger = logging.getLogger(__name__)
 def get_payment_methode(customer_code: str) -> PayementMode:
     """  """
 
@@ -13,6 +25,7 @@ def get_payment_methode(customer_code: str) -> PayementMode:
     cursor.execute("SELECT  PTE_0 FROM BPCUSTOMER WHERE BPCNUM_0 = ?", (customer_code, ))
 
     row = cursor.fetchone()
+    logger.debug(f"Fetched payment method row: {row}")
     sqlite_conn.close()
 
     return PayementMode(code= row[0])
@@ -27,6 +40,7 @@ def get_escomte(customer_code: str) -> Escomte:
     cursor.execute("SELECT  DEP_0 FROM BPCUSTOMER WHERE BPCINV_0 = ? ", (customer_code,))
 
     row = cursor.fetchone()
+    logger.debug(f"Fetched escomte row: {row}")
     sqlite_conn.close()
 
     return Escomte(code=row[0])
@@ -41,6 +55,7 @@ def get_cond_fac(customer_code: str) -> CondFacResponse:
     cursor.execute("SELECT  INVCND_0 FROM BPCUSTOMER WHERE BPCINV_0 = ?", (customer_code,))
 
     row = cursor.fetchone()
+    logger.debug(f"Fetched cond fac row: {row}")
     sqlite_conn.close()
 
     return CondFacResponse(code=row[0])
@@ -60,9 +75,11 @@ def get_element_facturation(customer_code: str) -> List[ElementFacturation]:
         WHERE BPCNUM_0 = ?
         """
 
-        print(f"Exécution de la requête pour l'élément de facturation {i} avec query={query}")
+        logger.debug(f"Exécution de la requête pour l'élément de facturation {i} avec query={query}")
         cursor.execute(query, (customer_code,))
         row = cursor.fetchone()
+        logger.debug(f"Fetched element facturation row for index {i}: {row}")
+        
         if row and row[0]:
             result.append(ElementFacturation(code=row[0], amount=row[1], type=row[2], majmin=row[3], description=row[4]))
     cursor.close()

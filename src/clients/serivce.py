@@ -1,8 +1,22 @@
 import sqlite3
+import sys
 from typing import List
 from unittest import result
 from ..clients.model import ClientFactureResponse, ClientResponse, TierResponse
 from database.sync_data import get_db_file
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s - %(name)s - %(funcName)s - %(lineno)d - %(threadName)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler('fastapi.log')
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
 
 def get_clients() -> List[ClientResponse]:
     """Fetch clients from the database."""
@@ -24,6 +38,7 @@ def get_clients() -> List[ClientResponse]:
             BPCNUM_0 ASC""")
 
     for row in cursor.fetchall():
+        logger.debug(f"Fetched client row: {row}")
         client = ClientResponse(
             code=row[0],
             name=row[1],
@@ -48,6 +63,7 @@ def get_tiers(customer_code: str) -> TierResponse:
     WHERE BPCUSTOMER.BPCNUM_0  = ? """), (customer_code,))
 
     row = cursor.fetchone()
+    logger.debug(f"Fetched tier row: {row}")
     tier = TierResponse(
             code=row[0],
             name=row[1]
@@ -65,6 +81,7 @@ def get_client_facture(code_client: str) -> ClientFactureResponse:
     cursor.execute("SELECT BPCINV_0 FROM BPCUSTOMER WHERE BPCNUM_0 = ? ", ("C0001",))
 
     row = cursor.fetchone()
+    logger.info(f"Fetched client facture row: {row}")
     clientFacture = ClientFactureResponse(
             code=row[0]
         )

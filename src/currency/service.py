@@ -1,7 +1,19 @@
 import sqlite3
 from ..currency.model import CurrencyResponse
 from database.sync_data import get_db_file
+import logging
+import sys
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s - %(name)s - %(funcName)s - %(lineno)d - %(threadName)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler('fastapi.log')
+    ]
+)
+
+logger = logging.getLogger(__name__)
 def get_commande_currrency(customer_code: str) -> CurrencyResponse:
 
     db_path = ""
@@ -11,6 +23,7 @@ def get_commande_currrency(customer_code: str) -> CurrencyResponse:
     cursor = sqlite_conn.cursor()
     cursor.execute("SELECT CUR_0 FROM BPCUSTOMER WHERE BPCNUM_0 = ? ", (customer_code,))
     row = cursor.fetchone()
+    logger.debug(f"Fetched currency row: {row}")
     currency = CurrencyResponse(
             code=row[0],
         )

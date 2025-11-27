@@ -19,7 +19,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 BASE_FOLDER = r"C:\poswaza\temp"
-LOCAL_DB_PATH = rf"{BASE_FOLDER}\db"
+LOCAL_DB_PATH = rf"{BASE_FOLDER}\db\config.db"
 
 _sync_lock = threading.Lock()
 

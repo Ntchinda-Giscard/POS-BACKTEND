@@ -16,7 +16,7 @@ def get_command_types() -> List[CommandTypeRRequest]:
 
     for row in cursor.fetchall():
         result.append(CommandTypeRRequest(code=row[0], description=row[1]))
-
+    sqlite_conn.close()
     return result
 
 def create_commande(inputs: CreateCommandRequest):

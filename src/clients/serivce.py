@@ -68,6 +68,7 @@ def get_client_facture(code_client: str) -> ClientFactureResponse:
     clientFacture = ClientFactureResponse(
             code=row[0]
         )
+    sqlite_conn.close()
         
 
     return clientFacture

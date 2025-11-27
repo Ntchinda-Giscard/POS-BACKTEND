@@ -19,7 +19,7 @@ def get_mode_livraison() -> List[ModeDeLivraisonRequest]:
             code=row[0]
         )
         results.append(mode)
-
+    sqlite_conn.close()
     return results
 
 def get_transporteur() -> List[TransPorteurResponse]:
@@ -37,5 +37,5 @@ def get_transporteur() -> List[TransPorteurResponse]:
             description=row[1]
         )
         results.append(transporteur)
-
+    sqlite_conn.close()
     return results

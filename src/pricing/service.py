@@ -634,7 +634,7 @@ class SageX3PricingEngine:
             if context.quantity >= focqtymin:
                 if foctyp == '1':  # Seuil (threshold - one time)
                     free_quantity = focqty
-                    print(f"  Threshold reached → {focqty} free items awarded (one-time)")
+                    print(f"  Threshold reached  {focqty} free items awarded (one-time)")
                     
                 elif foctyp == '2':  # Multiple (by buckets)
                     if focqtybkt > 0:
@@ -656,7 +656,7 @@ class SageX3PricingEngine:
             if line_amount >= focamtmin:
                 if foctyp == '1':  # Seuil (threshold - one time)
                     free_quantity = focqty
-                    print(f"  Threshold reached → {focqty} free items awarded (one-time)")
+                    print(f"  Threshold reached  {focqty} free items awarded (one-time)")
                     
                 elif foctyp == '2':  # Multiple (by buckets)
                     if focamtbkt > 0:
@@ -701,7 +701,7 @@ class SageX3PricingEngine:
             if context.quantity >= focqtymin:
                 if foctyp == '1':  # Seuil (threshold - one time)
                     free_quantity = focqty
-                    print(f"  Threshold reached → {focqty} of {focitmref} awarded (one-time)")
+                    print(f"  Threshold reached  {focqty} of {focitmref} awarded (one-time)")
                     
                 elif foctyp == '2':  # Multiple (by buckets)
                     if focqtybkt > 0:
@@ -719,7 +719,7 @@ class SageX3PricingEngine:
             if line_amount >= focamtmin:
                 if foctyp == '1':  # Seuil (threshold - one time)  
                     free_quantity = focqty
-                    print(f"  Threshold reached → {focqty} of {focitmref} awarded (one-time)")
+                    print(f"  Threshold reached  {focqty} of {focitmref} awarded (one-time)")
                     
                 elif foctyp == '2':  # Multiple (by buckets)
                     if focamtbkt > 0:
@@ -1166,7 +1166,7 @@ def test_calculation_types():
     # Cumulé
     price_after_discount1 = Decimal('100') - (Decimal('100') * Decimal('10') / Decimal('100'))  # 90
     price_cumulative = price_after_discount1 - (price_after_discount1 * Decimal('5') / Decimal('100'))  # 85.5
-    print(f"- Cumulé: 100 → 90 → {price_cumulative} EUR")
+    print(f"- Cumulé: 100  90  {price_cumulative} EUR")
     
     # Cascade  
     discount1_cascade = (Decimal('100') * Decimal('10') / Decimal('100'))  # 10
@@ -1371,21 +1371,21 @@ def explain_sage_x3_pricing_structure():
     print("Example Calculation Flow:")
     print("Base Price: 100.00")
     print("Quantity: 50 units")
-    print("Column 0: INCDCR=2, VALTYP=2, CLCRUL=1, Value=10 → 10% discount per unit")
-    print("  → 100.00 - (100.00 × 10%) = 90.00 per unit")
-    print("Column 1: INCDCR=2, VALTYP=2, CLCRUL=1, Value=5 → 5% cumulative discount")  
-    print("  → 90.00 - (90.00 × 5%) = 85.50 per unit")
-    print("Column 2: INCDCR=1, VALTYP=1, CLCRUL=2, Value=100 → 100€ fee per line")
-    print("  → Line total: 85.50 × 50 = 4275.00")
-    print("  → After fee: 4275.00 + 100.00 = 4375.00")
-    print("  → New unit price: 4375.00 ÷ 50 = 87.50")
+    print("Column 0: INCDCR=2, VALTYP=2, CLCRUL=1, Value=10  10% discount per unit")
+    print("   100.00 - (100.00 × 10%) = 90.00 per unit")
+    print("Column 1: INCDCR=2, VALTYP=2, CLCRUL=1, Value=5  5% cumulative discount")  
+    print("   90.00 - (90.00 × 5%) = 85.50 per unit")
+    print("Column 2: INCDCR=1, VALTYP=1, CLCRUL=2, Value=100  100€ fee per line")
+    print("   Line total: 85.50 × 50 = 4275.00")
+    print("   After fee: 4275.00 + 100.00 = 4375.00")
+    print("   New unit price: 4375.00 ÷ 50 = 87.50")
     print("Final Unit Price: 87.50")
 
 def test_free_items_scenarios():
     """
     Test pour démontrer les différents scénarios de gratuités Sage X3
     """
-    print("=== Test des Scénarios de Gratuités Sage X3 ===\n")
+    logger.info("=== Test des Scénarios de Gratuités Sage X3 ===\n")
     
     # Créer des contextes de test
     base_context = PricingContext(
@@ -1397,24 +1397,23 @@ def test_free_items_scenarios():
     )
     
     # Test N pour M - Seuil
-    print("Scénario 1: N pour M - Seuil")
-    print("Règle: 'À partir de 10 achetés, 2 gratuits' (même article)")
-    print(f"Commande: {base_context.quantity} unités de {base_context.item_code}")
+    logger.info("Scénario 1: N pour M - Seuil")
+    logger.info("Règle: 'À partir de 10 achetés, 2 gratuits' (même article)")
+    logger.info(f"Commande: {base_context.quantity} unités de {base_context.item_code}")
     
     # Simulation manuelle du calcul
     focqtymin = Decimal('10')
     focqty = Decimal('2')
     if base_context.quantity >= focqtymin:
-        print(f"✓ Seuil atteint ({base_context.quantity} ≥ {focqtymin})")
-        print(f"→ Gratuité: {focqty} unités de {base_context.item_code}")
+        logger.info(f" Seuil atteint ({base_context.quantity} ≥ {focqtymin})")
+        logger.info(f" Gratuité: {focqty} unités de {base_context.item_code}")
     else:
-        print(f"✗ Seuil non atteint ({base_context.quantity} < {focqtymin})")
-    print()
+        logger.info(f" Seuil non atteint ({base_context.quantity} < {focqtymin})")
     
     # Test N pour M - Multiple  
-    print("Scénario 2: N pour M - Multiple")
-    print("Règle: 'Au-delà de 5 unités, 1 gratuit par tranche de 3'")
-    print(f"Commande: {base_context.quantity} unités")
+    logger.info("Scénario 2: N pour M - Multiple")
+    logger.info("Règle: 'Au-delà de 5 unités, 1 gratuit par tranche de 3'")
+    logger.info(f"Commande: {base_context.quantity} unités")
     
     focqtymin = Decimal('5')
     focqtybkt = Decimal('3') 
@@ -1423,31 +1422,29 @@ def test_free_items_scenarios():
         excess_qty = base_context.quantity - focqtymin
         buckets = (excess_qty / focqtybkt).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
         total_free = buckets * focqty
-        print(f"✓ Excédent: {excess_qty} unités")
-        print(f"✓ Tranches de {focqtybkt}: {buckets}")
-        print(f"→ Gratuité: {total_free} unités")
+        logger.info(f" Excédent: {excess_qty} unités")
+        logger.info(f" Tranches de {focqtybkt}: {buckets}")
+        logger.info(f" Gratuité: {total_free} unités")
     else:
-        print(f"✗ Pas d'excédent")
-    print()
+        logger.info(f" Pas d'excédent")
     
     # Test Autre Article - Seuil
-    print("Scénario 3: Autre Article - Seuil")
-    print("Règle: 'À partir de 15 produits A, 1 produit B gratuit'")
-    print(f"Commande: {base_context.quantity} unités de PRODUCT_A")
+    logger.info("Scénario 3: Autre Article - Seuil")
+    logger.info("Règle: 'À partir de 15 produits A, 1 produit B gratuit'")
+    logger.info(f"Commande: {base_context.quantity} unités de PRODUCT_A")
     
     focqtymin = Decimal('15')
     focitmref = "PRODUCT_B"
     focqty = Decimal('1')
     if base_context.quantity >= focqtymin:
-        print(f"✓ Seuil atteint ({base_context.quantity} ≥ {focqtymin})")
-        print(f"→ Gratuité: {focqty} unité de {focitmref}")
+        logger.info(f" Seuil atteint ({base_context.quantity} ≥ {focqtymin})")
+        logger.info(f" Gratuité: {focqty} unité de {focitmref}")
     else:
-        print(f"✗ Seuil non atteint ({base_context.quantity} < {focqtymin})")
-    print()
+        logger.info(f" Seuil non atteint ({base_context.quantity} < {focqtymin})")
     
     # Test Total Commande - Montant
-    print("Scénario 4: Total Commande - Montant")
-    print("Règle: 'Si commande > 500€, 1 produit cadeau gratuit'")
+    logger.info("Scénario 4: Total Commande - Montant")
+    logger.info("Règle: 'Si commande > 500€, 1 produit cadeau gratuit'")
     
     unit_price = Decimal('30.00')
     line_total = base_context.quantity * unit_price
@@ -1455,44 +1452,41 @@ def test_free_items_scenarios():
     focitmref = "CADEAU_SPECIAL"
     focqty = Decimal('1')
     
-    print(f"Commande: {base_context.quantity} × {unit_price}€ = {line_total}€")
+    logger.info(f"Commande: {base_context.quantity} × {unit_price}€ = {line_total}€")
     if line_total >= focamtmin:
-        print(f"✓ Seuil atteint ({line_total}€ ≥ {focamtmin}€)")
-        print(f"→ Gratuité: {focqty} unité de {focitmref}")
+        logger.info(f" Seuil atteint ({line_total}€ ≥ {focamtmin}€)")
+        logger.info(f" Gratuité: {focqty} unité de {focitmref}")
     else:
-        print(f"✗ Seuil non atteint ({line_total}€ < {focamtmin}€)")
-    print()
+        logger.info(f" Seuil non atteint ({line_total}€ < {focamtmin}€)")
     
     # Résumé des mécanismes
-    print("=== Résumé des Mécanismes ===")
-    print("FOCPRO (Type de gratuité):")
-    print("  1 = N pour M (même article gratuit)")
-    print("  2 = Autre Article (article différent gratuit)")  
-    print("  3 = Total Commande (basé sur total commande)")
-    print()
-    print("FOCTYP (Mode d'attribution):")
-    print("  1 = Seuil (une fois atteint)")
-    print("  2 = Multiple (par tranches au-delà du seuil)")
-    print()
-    print("Seuils et tranches:")
-    print("  FOCQTYMIN/FOCAMTMIN = Seuil minimum")
-    print("  FOCQTYBKT/FOCAMTBKT = Taille des tranches (pour mode Multiple)")
-    print("  FOCQTY = Quantité gratuite par déclenchement")
+    logger.info("=== Résumé des Mécanismes ===")
+    logger.info("FOCPRO (Type de gratuité):")
+    logger.info("  1 = N pour M (même article gratuit)")
+    logger.info("  2 = Autre Article (article différent gratuit)")  
+    logger.info("  3 = Total Commande (basé sur total commande)")
+    logger.info("FOCTYP (Mode d'attribution):")
+    logger.info("  1 = Seuil (une fois atteint)")
+    logger.info("  2 = Multiple (par tranches au-delà du seuil)")
+    logger.info("Seuils et tranches:")
+    logger.info("  FOCQTYMIN/FOCAMTMIN = Seuil minimum")
+    logger.info("  FOCQTYBKT/FOCAMTBKT = Taille des tranches (pour mode Multiple)")
+    logger.info("  FOCQTY = Quantité gratuite par déclenchement")
 
 if __name__ == "__main__":
     # Example usage
     
     # Test des gratuités
     test_free_items_scenarios() 
-    print("\n")
+    logger.info("\n")
     
     # Test des types de calculs
     test_calculation_types()
-    print("\n")
+    logger.info("\n")
     
     # Explain the pricing structure first
     explain_sage_x3_pricing_structure()
-    print("\n")
+    logger.info("\n")
     
     # Run the complete test
     # test_pricing_engine_complete()

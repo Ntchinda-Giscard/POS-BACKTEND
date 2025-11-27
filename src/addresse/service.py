@@ -67,6 +67,7 @@ def get_adresse_expedition(legacy_comp: str) -> List[AddressRequest]:
             leg_comp=row[2]
         )
         result.append(address)
+    sqlite_conn.close()
 
     return result
 

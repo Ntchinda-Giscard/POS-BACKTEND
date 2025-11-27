@@ -14,5 +14,6 @@ def get_commande_currrency(customer_code: str) -> CurrencyResponse:
     currency = CurrencyResponse(
             code=row[0],
         )
+    sqlite_conn.close()
     
     return currency

@@ -23,6 +23,7 @@ def get_regime_taxe(customer_code: str) -> TaxeResponse:
                    """, (customer_code,))
     code = cursor.fetchone()[0]
     cursor.close()
+    sqlite_conn.close()
     return TaxeResponse(code=code)
 
 def get_niveau_taxe_article(item_code: str) -> str:
@@ -42,6 +43,7 @@ def get_niveau_taxe_article(item_code: str) -> str:
                    """, (item_code,))
     niveau = cursor.fetchone()[0]
     cursor.close()
+    sqlite3_conn.close()
     return niveau
 
 def get_legislation(regime_taxe_tiers: str) -> str:
@@ -61,6 +63,7 @@ def get_legislation(regime_taxe_tiers: str) -> str:
                    """, (regime_taxe_tiers,))
     legislation = cursor.fetchone()[0]
     cursor.close()
+    sqlite3_conn.close()
     return legislation
 
 def get_applied_tax(criterias: List[AppliedTaxInput]) -> List[AppliedTaxResponse]:
@@ -95,6 +98,7 @@ def get_applied_tax(criterias: List[AppliedTaxInput]) -> List[AppliedTaxResponse
 
     # details_taxe = determinateur._recuperer_details_taxe(code_taxe)
     cursor.close()
+    sqlite3_conn.close()
 
 
     return results

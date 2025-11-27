@@ -1,3 +1,4 @@
+from math import log
 import poplib
 import os
 import time
@@ -6,7 +7,20 @@ import shutil
 from email import parser
 from email import policy
 import sqlite3
+import logging
+import sys
 
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s - %(name)s - %(funcName)s - %(lineno)d - %(threadName)s',
+    handlers=[
+        logging.FileHandler('fastapi.log', encoding="utf-8"),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+# logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # ---------- CONFIG ----------
 POP_SERVER = "pop.gmail.com"   # change if needed
@@ -55,9 +69,9 @@ def clean_destination(folder):
                     try:
                         os.remove(path)
                     except Exception as e:
-                        print(f"Failed to remove locked DB {path}: {e}")
+                        logger.error(f"Failed to remove locked DB {path}: {e}")
                 else:
-                    print(f"Could not remove locked DB {path}")
+                    logger.error(f"Could not remove locked DB {path}")
 
 def move_db(src_path, destination_folder, retries=5, delay=0.5):
     """
@@ -107,7 +121,7 @@ def email_contains_zip(msg):
     Check if email contains a ZIP attachment.
     Now with detailed debugging and more thorough detection.
     """
-    print("  → Scanning email parts for ZIP...")
+    logger.info("   Scanning email parts for ZIP...")
     has_zip = False
     
     for part in msg.walk():
@@ -119,25 +133,25 @@ def email_contains_zip(msg):
         content_disposition = part.get("Content-Disposition", "")
         
         # Debug: Show what we found
-        print(f"    Part: type={content_type}, filename={filename}, disposition={content_disposition[:50] if content_disposition else 'None'}")
+        logger.info(f"    Part: type={content_type}, filename={filename}, disposition={content_disposition[:50] if content_disposition else 'None'}")
         
         # Check 1: Filename ends with .zip
         if filename and filename.lower().endswith(".zip"):
-            print(f"    ✓ Found ZIP by filename: {filename}")
+            logger.info(f"    Found ZIP by filename: {filename}")
             has_zip = True
             
         # Check 2: Content type is explicitly application/zip
         elif content_type == "application/zip":
-            print(f"    ✓ Found ZIP by content-type: application/zip")
+            logger.info(f"     Found ZIP by content-type: application/zip")
             has_zip = True
             
         # Check 3: octet-stream with .zip filename
         elif content_type == "application/octet-stream" and filename:
             if filename.lower().endswith(".zip"):
-                print(f"    ✓ Found ZIP in octet-stream: {filename}")
+                logger.info(f"     Found ZIP in octet-stream: {filename}")
                 has_zip = True
             else:
-                print(f"    ⚠ octet-stream but not .zip: {filename}")
+                logger.info(f"     octet-stream but not .zip: {filename}")
                 
         # Check 4: Try to detect zip by magic bytes (ZIP files start with 'PK')
         elif content_type == "application/octet-stream" or "attachment" in content_disposition.lower():
@@ -146,10 +160,10 @@ def email_contains_zip(msg):
                 if payload and len(payload) > 4:
                     # Check for ZIP magic bytes: 'PK\x03\x04' or 'PK\x05\x06'
                     if payload[:2] == b'PK':
-                        print(f"    ✓ Found ZIP by magic bytes (PK signature)")
+                        logger.info(f"     Found ZIP by magic bytes (PK signature)")
                         has_zip = True
             except Exception as e:
-                print(f"    ⚠ Error checking payload: {e}")
+                logger.error(f"     Error checking payload: {e}")
     
     return has_zip
 
@@ -162,7 +176,7 @@ def get_latest_mail_with_zip():
 
     resp, items, octets = pop_conn.list()
     total = len(items)
-    print("Total messages:", total)
+    logger.info(f"Total messages: {total}")
 
     if total == 0:
         pop_conn.quit()
@@ -170,7 +184,7 @@ def get_latest_mail_with_zip():
 
     # Iterate from most recent backwards
     for i in range(total, 0, -1):
-        print(f"\nChecking email #{i} ...")
+        logger.info(f"\nChecking email #{i} ...")
 
         resp, lines, octets = pop_conn.retr(i)
         raw_message = b"\r\n".join(lines)
@@ -178,18 +192,18 @@ def get_latest_mail_with_zip():
 
         subject = msg.get("Subject", "No Subject")
         from_addr = msg.get("From", "Unknown")
-        print(f"  Subject: {subject}")
-        print(f"  From: {from_addr}")
+        logger.info(f"  Subject: {subject}")
+        logger.info(f"  From: {from_addr}")
 
         # does this email contain a ZIP?
         if email_contains_zip(msg):
-            print(f"✓ Found ZIP in message #{i}")
+            logger.info(f" Found ZIP in message #{i}")
             pop_conn.quit()
             return msg
         else:
-            print(f"✗ No ZIP found in message #{i}")
+            logger.info(f" No ZIP found in message #{i}")
 
-    print("\n⚠ No emails with ZIP attachments found!")
+    logger.info("\n No emails with ZIP attachments found!")
     pop_conn.quit()
     return None
 
@@ -203,7 +217,7 @@ def extract_zip_from_email(msg, save_dir):
         content_type = part.get_content_type()
         disp = part.get("Content-Disposition", "")
 
-        print("DEBUG → content_type:", content_type,
+        logger.debug("DEBUG -> content_type:", content_type,
               "filename:", filename,
               "disposition:", disp)
 
@@ -243,7 +257,7 @@ def extract_zip_from_email(msg, save_dir):
             
             with open(save_path, "wb") as fh:
                 fh.write(payload)
-            print(f"DEBUG → Saved ZIP detected by magic bytes: {save_path}")
+            logger.debug(f"DEBUG -> Saved ZIP detected by magic bytes: {save_path}")
             return save_path
 
     return None
@@ -275,21 +289,21 @@ def fetch_db_from_latest_email():
     print("Connecting to POP3 and fetching latest email...")
     msg = get_latest_mail_with_zip()
     if msg is None:
-        print("No emails found with ZIP attachments.")
+        logger.info("No emails found with ZIP attachments.")
         return None
 
-    print("\nSearching for ZIP attachment...")
+    logger.info("\nSearching for ZIP attachment...")
     zip_path = extract_zip_from_email(msg, TEMP_DIR)
     if not zip_path:
-        print("No ZIP attachment found in latest email.")
+        logger.info("No ZIP attachment found in latest email.")
         return None
 
-    print("ZIP downloaded to:", zip_path)
+    logger.info(f"ZIP downloaded to: {zip_path}")
 
-    print("Extracting ZIP...")
+    logger.info("Extracting ZIP...")
     extracted_db = extract_zip(zip_path, TEMP_DIR)
     if not extracted_db or not os.path.exists(extracted_db):
-        print("No .db found inside ZIP.")
+        logger.info("No .db found inside ZIP.")
         # cleanup zip if desired
         try:
             os.remove(zip_path)
@@ -299,25 +313,24 @@ def fetch_db_from_latest_email():
 
     # Normalize path (zip may contain folder structure)
     extracted_db = os.path.normpath(extracted_db)
-    print("Extracted DB path:", extracted_db)
+    logger.info(f"Extracted DB path: {extracted_db}")
 
     # Wait until the extracted DB file is free (not locked)
     if not wait_until_file_free(extracted_db, timeout=10):
-        print("Warning: extracted DB may be locked. Proceeding to attempt move anyway.")
-
+        logger.warning("Warning: extracted DB may be locked. Proceeding to attempt move anyway.")
     # Clean existing DBs in destination
-    print("Cleaning destination folder:", DEST_DIR)
+    logger.info(f"Cleaning destination folder: {DEST_DIR}")
     clean_destination(DEST_DIR)
 
     # Move the new DB into destination
-    print("Moving DB to destination...")
+    logger.info("Moving DB to destination...")
     try:
         final_db = move_db(extracted_db, DEST_DIR)
     except FileNotFoundError:
-        print("Extracted .db not found when attempting to move (race condition).")
+        logger.error("Extracted .db not found when attempting to move (race condition).")
         final_db = None
     except Exception as e:
-        print("Failed to move DB:", e)
+        logger.error(f"Failed to move DB: {e}")
         final_db = None
 
     # Remove zip file
@@ -327,9 +340,9 @@ def fetch_db_from_latest_email():
         pass
 
     if final_db:
-        print("New DB installed at:", final_db)
+        logger.info(f"New DB installed at: {final_db}")
     else:
-        print("DB installation failed.")
+        logger.info("DB installation failed.")
 
     return final_db
 

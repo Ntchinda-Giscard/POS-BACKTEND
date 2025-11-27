@@ -13,6 +13,7 @@ def get_payment_methode(customer_code: str) -> PayementMode:
     cursor.execute("SELECT  PTE_0 FROM BPCUSTOMER WHERE BPCNUM_0 = ?", (customer_code, ))
 
     row = cursor.fetchone()
+    sqlite_conn.close()
 
     return PayementMode(code= row[0])
 
@@ -26,6 +27,7 @@ def get_escomte(customer_code: str) -> Escomte:
     cursor.execute("SELECT  DEP_0 FROM BPCUSTOMER WHERE BPCINV_0 = ? ", (customer_code,))
 
     row = cursor.fetchone()
+    sqlite_conn.close()
 
     return Escomte(code=row[0])
 
@@ -39,6 +41,7 @@ def get_cond_fac(customer_code: str) -> CondFacResponse:
     cursor.execute("SELECT  INVCND_0 FROM BPCUSTOMER WHERE BPCINV_0 = ?", (customer_code,))
 
     row = cursor.fetchone()
+    sqlite_conn.close()
 
     return CondFacResponse(code=row[0])
 

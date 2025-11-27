@@ -43,7 +43,7 @@ def get_clients() -> List[ClientResponse]:
             code=row[0],
             name=row[1],
             cur=row[2],
-            mode_fac=row[3]
+            mode_fac=str(row[3])
         )
         result.append(client)
 

@@ -5,6 +5,19 @@ from typing import List
 from unittest import result
 from ..taxe.model import AppliedTaxInput, AppliedTaxResponse, TaxeResponse
 from database.sync_data import get_db_file
+import logging
+import sys
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s - %(name)s - %(funcName)s - %(lineno)d - %(threadName)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler('fastapi.log')
+    ]
+)
+
+logger = logging.getLogger(__name__)
 
 def get_regime_taxe(customer_code: str) -> TaxeResponse:
     """Fetch tax regime from the database."""
@@ -22,6 +35,7 @@ def get_regime_taxe(customer_code: str) -> TaxeResponse:
             BPCNUM_0 = ?
                    """, (customer_code,))
     code = cursor.fetchone()[0]
+    logger.debug(f"Fetched tax regime code: {code}")
     cursor.close()
     sqlite_conn.close()
     return TaxeResponse(code=code)

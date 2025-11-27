@@ -3,6 +3,19 @@ from .model import ModeDeLivraisonRequest, TransPorteurResponse
 import sqlite3
 from typing import List
 from database.sync_data import get_db_file
+import logging
+import sys
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s - %(name)s - %(funcName)s - %(lineno)d - %(threadName)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler('fastapi.log')
+    ]
+)
+
+logger = logging.getLogger(__name__)
 
 def get_mode_livraison() -> List[ModeDeLivraisonRequest]:
 
@@ -15,6 +28,7 @@ def get_mode_livraison() -> List[ModeDeLivraisonRequest]:
     cursor.execute("SELECT MDL_0 FROM TABMODELIV")
 
     for row in cursor.fetchall():
+        logger.debug(f"Fetched mode livraison row: {row}")
         mode = ModeDeLivraisonRequest(
             code=row[0]
         )
@@ -32,6 +46,7 @@ def get_transporteur() -> List[TransPorteurResponse]:
     cursor.execute("SELECT BPTNUM_0, BPTNAM_0 FROM BPCARRIER")
 
     for row in cursor.fetchall():
+        logger.debug(f"Fetched transporteur row: {row}")
         transporteur = TransPorteurResponse(
             code=row[0],
             description=row[1]

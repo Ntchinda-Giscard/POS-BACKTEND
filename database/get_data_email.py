@@ -29,8 +29,7 @@ EMAIL_USER = "giscardntchinda@gmail.com"
 EMAIL_PASS = "yzeq tafx waik ihqh"
 
 TEMP_DIR = r"C:\temp\incoming_zip"   # temporary storage for zip + extraction
-# DEST_DIR = r"E:\original"            # destination folder where only one .db must exist
-
+DEST_DIR = rf"C:\poswaza\temp\db"
 # ---------- UTIL ----------
 
 def ensure_folder(path):
@@ -274,14 +273,9 @@ def fetch_db_from_latest_email():
     - move new .db into destination
     Returns final DB path or None.
     """
-    db_path = r"c:/posdatabase/config.db"
-    folder_conn = sqlite3.connect(db_path)
-    folder_cursor = folder_conn.cursor()
-    folder_cursor.execute("SELECT * FROM configurations_folders")
-    folder_rows = folder_cursor.fetchone()
-    folder_conn.close()
+    
 
-    DEST_DIR = folder_rows[2]
+    
 
     ensure_folder(TEMP_DIR)
     ensure_folder(DEST_DIR)

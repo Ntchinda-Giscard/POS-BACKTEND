@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 BASE_FOLDER = r"C:\poswaza\temp"
 LOCAL_DB_PATH = rf"{BASE_FOLDER}\db\config.db"
+DEST_DIR = rf"C:\poswaza\temp\db"
 
 _sync_lock = threading.Lock()
 
@@ -60,22 +61,7 @@ def move_db(db_file, destination_folder):
 def sync_data_new():
     with _sync_lock:
         
-        folder_conn = sqlite3.connect(LOCAL_DB_PATH)
-        folder_cursor = folder_conn.cursor()
-        folder_cursor.execute("SELECT * FROM configurations_folders")
-        folder_rows = folder_cursor.fetchone()
-        folder_conn.close()
-
-        source_folder = folder_rows[1]
-        destination_folder = folder_rows[2]
-
-        final_db_path = None
-
-        # -----------------------
-        # MAIN LOGIC
-        # -----------------------
-
-        zip_file = get_single_zip(source_folder)
+        
 
         # if zip_file:
         #     print("ZIP found:", zip_file)
@@ -89,6 +75,22 @@ def sync_data_new():
 
             return final_db_path
         except Exception as e:
+            folder_conn = sqlite3.connect(LOCAL_DB_PATH)
+            folder_cursor = folder_conn.cursor()
+            folder_cursor.execute("SELECT * FROM configurations_folders")
+            folder_rows = folder_cursor.fetchone()
+            folder_conn.close()
+
+            source_folder = folder_rows[1]
+            destination_folder = folder_rows[2]
+
+            final_db_path = None
+
+            # -----------------------
+            # MAIN LOGIC
+            # -----------------------
+
+            zip_file = get_single_zip(source_folder)
             logger.error(f"Failed to fetch DB from email: {e}")
             extracted_db = extract_zip(zip_file, source_folder)
             logger.info(f"Extracted DB path: {extracted_db}")
@@ -117,13 +119,9 @@ def get_db_file():
     Returns None if no .db file is found.
     """
     
-    folder_conn = sqlite3.connect(LOCAL_DB_PATH)
-    folder_cursor = folder_conn.cursor()
-    folder_cursor.execute("SELECT * FROM configurations_folders")
-    folder_rows = folder_cursor.fetchone()
-    folder_conn.close()
+   
 
-    destination_folder = folder_rows[2]
+    destination_folder = DEST_DIR
     folder_path = destination_folder
     if not os.path.exists(folder_path):
         return None

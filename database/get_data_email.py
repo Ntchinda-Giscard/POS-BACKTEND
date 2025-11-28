@@ -24,42 +24,9 @@ logging.basicConfig(
 # logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def fetch_pop_credentials():
-    """
-    Fetch POP server credentials from environment variables.
-    Returns a tuple (server, port, username, password).
-    Raises ValueError if any are missing.
-    """
-    try: 
 
-        LOCAL_DB_PATH = r"C:\poswaza\temp\db\pos_local.db"
 
-        conn = sqlite3.connect(LOCAL_DB_PATH)
-        cursor = conn.cursor()
-        cursor.execute("SELECT server, username, password, port FROM pop_config LIMIT 1")
-        row = cursor.fetchone()
-        conn.close()
 
-        if not row:
-            raise ValueError("POP configuration not found in database.")
-        return row[0], row[3], row[1], row[2]
-    except Exception as e:
-        logger.error(f"Error fetching POP credentials: {e}")
-        return None, None, None, None
-
-    
-# ---------- CONFIG ----------
-# POP_SERVER = "pop.gmail.com"   # change if needed
-# POP_PORT = 995
-# EMAIL_USER = "giscardntchinda@gmail.com"
-# EMAIL_PASS = "yzeq tafx waik ihqh"
-
-pop_data = fetch_pop_credentials()
-
-POP_SERVER = pop_data[0]
-POP_PORT = pop_data[1]
-EMAIL_USER = pop_data[2]
-EMAIL_PASS = pop_data[3]
 
 TEMP_DIR = r"C:\temp\incoming_zip"   # temporary storage for zip + extraction
 DEST_DIR = rf"C:\poswaza\temp\db"
@@ -201,7 +168,8 @@ def email_contains_zip(msg):
 
 # ---------- POP3 + email helpers ----------
 
-def get_latest_mail_with_zip():
+def get_latest_mail_with_zip(POP_SERVER, POP_PORT, EMAIL_USER, EMAIL_PASS):
+    
     pop_conn = poplib.POP3_SSL(POP_SERVER, POP_PORT, timeout=30) # type: ignore
     pop_conn.user(EMAIL_USER) # type: ignore
     pop_conn.pass_(EMAIL_PASS) # type: ignore
@@ -296,7 +264,7 @@ def extract_zip_from_email(msg, save_dir):
 
 # ---------- Main pipeline ----------
 
-def fetch_db_from_latest_email():
+def fetch_db_from_latest_email(POP_SERVER, POP_PORT, EMAIL_USER, EMAIL_PASS):
     """
     Entire pipeline:
     - fetch latest email via POP3
@@ -314,7 +282,7 @@ def fetch_db_from_latest_email():
     ensure_folder(DEST_DIR)
 
     print("Connecting to POP3 and fetching latest email...")
-    msg = get_latest_mail_with_zip()
+    msg = get_latest_mail_with_zip(POP_SERVER, POP_PORT, EMAIL_USER, EMAIL_PASS)
     if msg is None:
         logger.info("No emails found with ZIP attachments.")
         return None
@@ -374,6 +342,6 @@ def fetch_db_from_latest_email():
     return final_db
 
 # ---------- If run as script ----------
-if __name__ == "__main__":
-    result = fetch_db_from_latest_email()
-    print("Result:", result)
+# if __name__ == "__main__":
+#     result = fetch_db_from_latest_email()
+#     print("Result:", result)

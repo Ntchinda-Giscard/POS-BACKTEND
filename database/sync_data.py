@@ -52,25 +52,36 @@ def move_db(db_file, destination_folder):
     shutil.move(db_file, dest_file)
     return dest_file
 
-# def sync_data():
-#     # --- Close connections ---
-#     sqlserver_conn.close()
-#     sqlite_conn.close()
-#     print(" All SEED tables copied successfully!")
+def fetch_pop_credentials():
+    """
+    Fetch POP server credentials from environment variables.
+    Returns a tuple (server, port, username, password).
+    Raises ValueError if any are missing.
+    """
+    try: 
+
+        LOCAL_DB_PATH = r"C:\poswaza\temp\db\pos_local.db"
+
+        conn = sqlite3.connect(LOCAL_DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT server, username, password, port FROM pop_config LIMIT 1")
+        row = cursor.fetchone()
+        conn.close()
+
+        if not row:
+            raise ValueError("POP configuration not found in database.")
+        return row[0], row[3], row[1], row[2]
+    except Exception as e:
+        logger.error(f"Error fetching POP credentials: {e}")
+        return None, None, None, None
+
+
 
 def sync_data_new():
     with _sync_lock:
-        
-        
-
-        # if zip_file:
-        #     print("ZIP found:", zip_file)
-
-            
-
-            
+        POP_SERVER, POP_PORT, EMAIL_USER, EMAIL_PASS = fetch_pop_credentials()
         try:
-            final_db_path = fetch_db_from_latest_email()
+            final_db_path = fetch_db_from_latest_email(POP_SERVER, POP_PORT, EMAIL_USER, EMAIL_PASS)
             logging.info(f"Fetched DB from email: {final_db_path}")
 
             return final_db_path

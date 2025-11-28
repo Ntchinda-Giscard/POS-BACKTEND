@@ -40,4 +40,15 @@ async def add_settings(settings: SettingsInput, db=Depends(get_db)):
     db.close()
 
     return settings
-    
+
+@router.post("/get", response_model=SettingsInput)
+async def get_settings(db=Depends(get_db)):
+    config = db.query(POPConfig).first()
+    if config:
+        return SettingsInput(
+            popServer=config.server,
+            username=config.username,
+            password=config.password,
+            port=config.port
+        )
+    return None

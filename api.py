@@ -1,5 +1,6 @@
 import sys
 from fastapi import FastAPI
+from database.session import Base, engine
 from database.sync_data import sync_data_new
 from src.articles.controller import router as article_router
 from src.addresse.controller import router as address_router
@@ -26,6 +27,9 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+Base.metadata.create_all(bind=engine)
+
 
 async def periodic_sync():
     """Run sync_data immediately at startup and then every 15 minutes."""

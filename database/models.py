@@ -1,6 +1,6 @@
 from sqlalchemy import Boolean, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from session import Base
+from .session import Base
 
 class POPConfig(Base):
     __tablename__ = "pop_config"

@@ -41,7 +41,7 @@ async def add_settings(settings: SettingsInput, db=Depends(get_db)):
 
     return settings
 
-@router.post("/get", response_model=SettingsInput)
+@router.get("/get", response_model=SettingsInput)
 async def get_settings(db=Depends(get_db)):
     config = db.query(POPConfig).first()
     if config:

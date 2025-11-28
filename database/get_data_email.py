@@ -10,6 +10,9 @@ import sqlite3
 import logging
 import sys
 
+from backend.database.models import POPConfig
+from .session import get_db, SQLALCHEMY_DATABASE_URL
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,11 +25,36 @@ logging.basicConfig(
 # logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def fetch_pop_credentials():
+    """
+    Fetch POP server credentials from environment variables.
+    Returns a tuple (server, port, username, password).
+    Raises ValueError if any are missing.
+    """
+
+    conn = sqlite3.connect(SQLALCHEMY_DATABASE_URL)
+    cursor = conn.cursor()
+    cursor.execute("SELECT server, username, password, port FROM pop_config LIMIT 1")
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        raise ValueError("POP configuration not found in database.")
+    return row[0], row[3], row[1], row[2]
+
+    
 # ---------- CONFIG ----------
-POP_SERVER = "pop.gmail.com"   # change if needed
-POP_PORT = 995
-EMAIL_USER = "giscardntchinda@gmail.com"
-EMAIL_PASS = "yzeq tafx waik ihqh"
+# POP_SERVER = "pop.gmail.com"   # change if needed
+# POP_PORT = 995
+# EMAIL_USER = "giscardntchinda@gmail.com"
+# EMAIL_PASS = "yzeq tafx waik ihqh"
+
+pop_data = fetch_pop_credentials()
+
+POP_SERVER = pop_data[0]   # change if needed
+POP_PORT = pop_data[1]
+EMAIL_USER = pop_data[2]
+EMAIL_PASS = pop_data[3]
 
 TEMP_DIR = r"C:\temp\incoming_zip"   # temporary storage for zip + extraction
 DEST_DIR = rf"C:\poswaza\temp\db"

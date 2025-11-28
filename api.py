@@ -10,6 +10,7 @@ from src.currency.controller import router as currency_router
 from src.livraison.controller import router as livraison_router
 from src.facturation.controller import router as facture_router
 from src.pricing.controller import router as pricing_router
+from src.settings.controller import router as settings_router
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import asyncio
@@ -76,6 +77,7 @@ app.include_router(currency_router)
 app.include_router(livraison_router)
 app.include_router(facture_router)
 app.include_router(pricing_router)
+app.include_router(settings_router)
 
 @app.get("/")
 def read_root():

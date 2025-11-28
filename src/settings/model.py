@@ -4,8 +4,7 @@ from datetime import datetime
 
 
 class SettingsInput(BaseModel):
-    pop_server: str
+    popServer: str
     username: str
     port: int
     password: str
-    updated_at: datetime = datetime.now()

@@ -343,5 +343,5 @@ def fetch_db_from_latest_email(POP_SERVER, POP_PORT, EMAIL_USER, EMAIL_PASS):
 
 # ---------- If run as script ----------
 # if __name__ == "__main__":
-#     result = fetch_db_from_latest_email()
+    # result = fetch_db_from_latest_email()
 #     print("Result:", result)

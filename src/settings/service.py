@@ -1,5 +1,6 @@
 import logging
 import sys
+from database.session import get_db
 
 logging.basicConfig(
     level=logging.DEBUG,

@@ -346,7 +346,7 @@
 #     # result = fetch_db_from_latest_email()
 # #     print("Result:", result)
 
-
+# pop3 cred: bsxd vlat exbv rgqp
 
 from math import log
 import poplib

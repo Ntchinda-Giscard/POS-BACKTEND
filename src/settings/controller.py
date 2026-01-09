@@ -74,3 +74,13 @@ async def add_folder_db( add_config: FolderConfigInput, db: Session = Depends(ge
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str('Une erreur est survenue lors de la sauvegarde de la configuration du dossier.'),
         )
+
+
+@router.get("/get/folder", response_model=FolderConfigInput)
+async def get_folder_db( db: Session = Depends(get_db)):
+    config = db.query(FolderConfig).first()
+    if config:
+        return FolderConfigInput(
+            path=config.path # type: ignore
+        )
+    return None

@@ -8,3 +8,6 @@ class SettingsInput(BaseModel):
     username: str
     port: int
     password: str
+
+class FolderConfigInput(BaseModel):
+    path: str

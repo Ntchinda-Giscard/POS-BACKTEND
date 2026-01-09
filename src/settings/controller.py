@@ -1,9 +1,10 @@
 import logging
 import sys
 from database.session import get_db
-from fastapi import APIRouter, Depends
-from .model import SettingsInput
-from database.models import POPConfig
+from fastapi import APIRouter, Depends, HTTPException, status
+from .model import FolderConfigInput, SettingsInput
+from sqlalchemy.orm import Session
+from database.models import FolderConfig, POPConfig
 
 
 router = APIRouter(
@@ -21,7 +22,7 @@ logging.basicConfig(
 )
 
 @router.post("/add", response_model=SettingsInput)
-async def add_settings(settings: SettingsInput, db=Depends(get_db)):
+async def add_settings(settings: SettingsInput, db: Session = Depends(get_db)):
     logging.debug(f"Received settings to add: {settings}")
     # Here you would add logic to save settings to the database
     db.query(POPConfig).delete()  # Clear existing settings for simplicity
@@ -42,13 +43,33 @@ async def add_settings(settings: SettingsInput, db=Depends(get_db)):
     return settings
 
 @router.get("/get", response_model=SettingsInput)
-async def get_settings(db=Depends(get_db)):
+async def get_settings(db: Session =Depends(get_db)):
     config = db.query(POPConfig).first()
     if config:
         return SettingsInput(
-            popServer=config.server,
-            username=config.username,
-            password=config.password,
-            port=config.port
+            popServer=config.server, # type: ignore
+            username=config.username, # type: ignore
+            password=config.password, # type: ignore
+            port=config.port, # type: ignore
         )
     return None
+
+
+@router.get("/get/folder", response_model=FolderConfigInput)
+async def test_connection( add_config: FolderConfigInput, db: Session = Depends(get_db)):
+    config = db.query(FolderConfig).delete()
+
+    folder_config = FolderConfig(
+        path=add_config.path
+    )
+
+    try:
+        db.add(folder_config)
+        db.commit()
+        db.refresh(folder_config)
+        return add_config
+    except Exception as e:
+        return HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )

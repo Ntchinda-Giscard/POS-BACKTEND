@@ -1,6 +1,6 @@
 from fastapi import Depends
-from backend.database.models import FolderConfig
-from backend.database.session import get_db
+from database.models import FolderConfig
+from database.session import get_db
 import logging
 import os
 import threading

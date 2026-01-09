@@ -55,8 +55,8 @@ async def get_settings(db: Session =Depends(get_db)):
     return None
 
 
-@router.get("/get/folder", response_model=FolderConfigInput)
-async def test_connection( add_config: FolderConfigInput, db: Session = Depends(get_db)):
+@router.post("/add/folder", response_model=FolderConfigInput)
+async def add_folder_db( add_config: FolderConfigInput, db: Session = Depends(get_db)):
     config = db.query(FolderConfig).delete()
 
     folder_config = FolderConfig(
@@ -69,7 +69,8 @@ async def test_connection( add_config: FolderConfigInput, db: Session = Depends(
         db.refresh(folder_config)
         return add_config
     except Exception as e:
+        logging.error(f"Error saving folder configuration: {e}")
         return HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
+            detail=str('Une erreur est survenue lors de la sauvegarde de la configuration du dossier.'),
         )

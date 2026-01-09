@@ -1,13 +1,15 @@
 import sqlite3
 from typing import List
-from ..addresse.model import AddressInput, AddressLivrasonREsponse, AddressRequest
 from database.sync_data import get_db_file
+from database.session import get_db
+from ..addresse.model import AddressInput, AddressLivrasonREsponse, AddressRequest
+from sqlalchemy.orm import Session
 
 
-def get_adresse_vente() -> List[AddressRequest]:
+def get_adresse_vente(db) -> List[AddressRequest]:
     """  """
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     result = []
     cursor = sqlite_conn.cursor()
@@ -24,11 +26,11 @@ def get_adresse_vente() -> List[AddressRequest]:
     return result
 
 
-def get_adresse_livraison(code_clinet: str) -> List[AddressLivrasonREsponse]:
+def get_adresse_livraison(code_clinet: str, db: Session) -> List[AddressLivrasonREsponse]:
     """Fetch delivery addresses from the database."""
 
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
     result = []
@@ -42,11 +44,11 @@ def get_adresse_livraison(code_clinet: str) -> List[AddressLivrasonREsponse]:
 
     return result 
 
-def get_adresse_expedition(legacy_comp: str) -> List[AddressRequest]:
+def get_adresse_expedition(legacy_comp: str, db: Session) -> List[AddressRequest]:
     """  """
     
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     result = []
     cursor = sqlite_conn.cursor()

@@ -4,6 +4,9 @@ from typing import List
 from unittest import result
 from ..clients.model import ClientFactureResponse, ClientResponse, TierResponse
 from database.sync_data import get_db_file
+from database.session import get_db
+from fastapi import Depends
+from sqlalchemy.orm import Session
 import logging
 
 logging.basicConfig(
@@ -18,11 +21,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_clients() -> List[ClientResponse]:
+def get_clients(db: Session = Depends(get_db)) -> List[ClientResponse]:
     """Fetch clients from the database."""
 
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     result = []
     cursor = sqlite_conn.cursor()
@@ -50,10 +53,10 @@ def get_clients() -> List[ClientResponse]:
     return result
 
 
-def get_tiers(customer_code: str) -> TierResponse:
+def get_tiers(customer_code: str, db: Session = Depends(get_db)) -> TierResponse:
     """" Get tiers """
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
 
     cursor = sqlite_conn.cursor()
@@ -71,11 +74,11 @@ def get_tiers(customer_code: str) -> TierResponse:
 
     return tier
 
-def get_client_facture(code_client: str) -> ClientFactureResponse:
+def get_client_facture(code_client: str, db: Session = Depends(get_db)) -> ClientFactureResponse:
     """Fetch clients from the database."""
 
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
     cursor.execute("SELECT BPCINV_0 FROM BPCUSTOMER WHERE BPCNUM_0 = ? ", ("C0001",))

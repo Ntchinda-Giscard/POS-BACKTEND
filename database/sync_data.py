@@ -23,7 +23,7 @@ DEST_DIR = rf"C:\poswaza\temp\db"
 
 _sync_lock = threading.Lock()
 
-def get_db_file(db: Session = Depends(get_db)) -> str | None:
+def get_db_file(db: Session) -> str | None:
     """
     Scan the folder for a .db file and return its full path.
     Returns None if no .db file is found.

@@ -2,14 +2,15 @@ import sqlite3
 from typing import Dict, List
 import base64
 from database.sync_data import get_db_file
+from sqlalchemy.orm import Session
 # from src.articles.model import ArticleInput
 
 from ..articles.model import ArticleInput, ArticleRequest
 
 
-def get_articles_site(input: ArticleInput) -> List[ArticleRequest]:
+def get_articles_site(input: ArticleInput, db: Session) -> List[ArticleRequest]:
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     results = []
     sqlite_cursor = sqlite_conn.cursor()
@@ -60,12 +61,12 @@ def get_articles_site(input: ArticleInput) -> List[ArticleRequest]:
 
     return results
 
-def search_article(site_id: str, q: str) -> List[ArticleRequest]:
+def search_article(site_id: str, q: str, db: Session) -> List[ArticleRequest]:
 
     results = []
     # --- .1 Connect to SQLite ---
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     sqlite_cursor = sqlite_conn.cursor()
 

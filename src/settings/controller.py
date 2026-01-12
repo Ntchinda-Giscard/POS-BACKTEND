@@ -45,14 +45,13 @@ async def add_settings(settings: SettingsInput, db: Session = Depends(get_db)):
 @router.get("/get", response_model=SettingsInput)
 async def get_settings(db: Session =Depends(get_db)):
     config = db.query(POPConfig).first()
-    if config:
-        return SettingsInput(
-            popServer=config.server, # type: ignore
-            username=config.username, # type: ignore
-            password=config.password, # type: ignore
-            port=config.port, # type: ignore
-        )
-    return None
+    
+    return SettingsInput(
+        popServer=config.server,
+        username=config.username,
+        password=config.password,
+        port=config.port,
+    )
 
 
 @router.post("/add/folder", response_model=FolderConfigInput)

@@ -1,8 +1,8 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from backend.database.session import get_db
-from src.articles.service import get_articles_site, search_article
+from database.session import get_db
+from .service import get_articles_site, search_article
 from .model import ArticleInput, ArticleRequest  # Make sure ArticleRequest is defined in schemas.py
 
 

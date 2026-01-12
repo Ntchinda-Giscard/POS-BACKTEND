@@ -17,9 +17,6 @@ logging.basicConfig(
 # logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-BASE_FOLDER = r"C:\poswaza\temp"
-LOCAL_DB_PATH = rf"{BASE_FOLDER}\db\config.db"
-DEST_DIR = rf"C:\poswaza\temp\db"
 
 _sync_lock = threading.Lock()
 
@@ -33,6 +30,7 @@ def get_db_file(db: Session) -> str | None:
     db_config = db.query(FolderConfig).first()
     if db_config:
         db_path = db_config.path  # type: ignore
+        logger.info(f"Database path from config: {db_path}")
         if os.path.isfile(db_path) and db_path.endswith('.db'): # type: ignore
             logger.info(f"Database file found: {db_path}")
             return db_path # type: ignore

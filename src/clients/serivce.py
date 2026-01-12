@@ -21,11 +21,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_clients(db: Session = Depends(get_db)) -> List[ClientResponse]:
+def get_clients(db) -> List[ClientResponse]:
     """Fetch clients from the database."""
 
     db_path = ""
     db_path = get_db_file(db)
+    logger.info(f"Database path: {db_path}")
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     result = []
     cursor = sqlite_conn.cursor()
@@ -57,6 +58,7 @@ def get_tiers(customer_code: str, db: Session = Depends(get_db)) -> TierResponse
     """" Get tiers """
     db_path = ""
     db_path = get_db_file(db)
+    logger.info(f"Database path: {db_path}")
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
 
     cursor = sqlite_conn.cursor()
@@ -74,11 +76,12 @@ def get_tiers(customer_code: str, db: Session = Depends(get_db)) -> TierResponse
 
     return tier
 
-def get_client_facture(code_client: str, db: Session = Depends(get_db)) -> ClientFactureResponse:
+def get_client_facture(code_client: str, db) -> ClientFactureResponse:
     """Fetch clients from the database."""
 
     db_path = ""
     db_path = get_db_file(db)
+    logger.info(f"Database path: {db_path}")
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
     cursor.execute("SELECT BPCINV_0 FROM BPCUSTOMER WHERE BPCNUM_0 = ? ", ("C0001",))

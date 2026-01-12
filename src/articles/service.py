@@ -47,7 +47,13 @@ def get_articles_site(input: ArticleInput, db: Session) -> List[ArticleRequest]:
 
     for article in articles:
         raw_img = article[5]   # BLOB from DB
-        img_b64 = base64.b64encode(raw_img).decode("utf-8") if raw_img else None
+        if raw_img:
+            if isinstance(raw_img, str):
+                raw_img = raw_img.encode("utf-8")
+            img_b64 = base64.b64encode(raw_img).decode("utf-8")
+        else:
+            img_b64 = None
+
 
         results.append(ArticleRequest(
             item_code=article[0],

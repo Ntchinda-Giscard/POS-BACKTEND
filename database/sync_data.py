@@ -31,9 +31,10 @@ def get_db_file(db: Session) -> str | None:
     if db_config:
         db_path = db_config.path  # type: ignore
         logger.info(f"Database path from config: {db_path}")
+        print(f"Database path from config: {db_path}")
         if os.path.isfile(db_path) and db_path.endswith('.db'): # type: ignore
             logger.info(f"Database file found: {db_path}")
-            return db_path # type: ignore
+            return f"{db_path}\\local_data.db" # type: ignore
         else:
             logger.warning(f"The path in the database config is not a valid .db file: {db_path}")
     return None

@@ -7,6 +7,7 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+backend/dist/
 .Python
 build/
 develop-eggs/
@@ -179,9 +180,10 @@ Desktop.ini
 *.temp
 *.swp
 *.swo
+*.exe
 
 # Project-specific (uncomment as needed)
 # config.py
-# secrets.json
-# data/
-# logs/
+secrets.json
+data/
+logs/

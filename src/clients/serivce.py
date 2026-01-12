@@ -59,6 +59,7 @@ def get_tiers(customer_code: str, db: Session = Depends(get_db)) -> TierResponse
     db_path = ""
     db_path = get_db_file(db)
     logger.info(f"Database path: {db_path}")
+    print(f"Database path: {db_path}")
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
 
     cursor = sqlite_conn.cursor()
@@ -82,6 +83,7 @@ def get_client_facture(code_client: str, db) -> ClientFactureResponse:
     db_path = ""
     db_path = get_db_file(db)
     logger.info(f"Database path: {db_path}")
+    print(f"Database path: {db_path}")
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
     cursor.execute("SELECT BPCINV_0 FROM BPCUSTOMER WHERE BPCNUM_0 = ? ", ("C0001",))

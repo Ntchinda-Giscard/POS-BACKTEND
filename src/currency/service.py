@@ -3,6 +3,7 @@ from ..currency.model import CurrencyResponse
 from database.sync_data import get_db_file
 import logging
 import sys
+from sqlalchemy.orm import Session
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -14,10 +15,10 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-def get_commande_currrency(customer_code: str) -> CurrencyResponse:
+def get_commande_currrency(customer_code: str, db: Session) -> CurrencyResponse:
 
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
 
     cursor = sqlite_conn.cursor()

@@ -1,5 +1,8 @@
 from sqlalchemy import Column, Integer, String
-from .session import Base
+try:
+    from .session import Base
+except ImportError:
+    from session import Base
 
 class POPConfig(Base):
     __tablename__ = "pop_config"

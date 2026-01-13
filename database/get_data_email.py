@@ -3,7 +3,7 @@ import poplib
 import email
 from email import policy
 import time
-from session import get_db
+from session import SessionLocal
 from models import POPConfig
 
 
@@ -18,6 +18,7 @@ class EmailCSVDownloader:
 
     def download_csv_attachments(self):
         """Connects to POP3 server, iterates through messages, and saves CSV attachments."""
+        print(f"DEBUG: Attempting to connect to host: '{self.host}'")
         server = poplib.POP3_SSL(self.host)
         try:
             server.user(self.user)
@@ -71,11 +72,12 @@ def run_periodic_download(host, user, password, save_dir, interval=3600):
 
 
 if __name__ == "__main__":
-    db = get_db()
+    db = SessionLocal()
     email_config = db.query(POPConfig).first()
+    print(email_config)
     run_periodic_download(
-        host=email_config.host,
-        user=email_config.user,
+        host=email_config.server,
+        user=email_config.username,
         password=email_config.password,
         save_dir="./attachments",
         interval=60  # 1 hour

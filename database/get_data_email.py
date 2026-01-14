@@ -1,5 +1,5 @@
 import os
-import poplib
+import imaplib
 import email
 from email import policy
 import time
@@ -17,22 +17,28 @@ class EmailCSVDownloader:
             os.makedirs(self.save_dir)
 
     def download_csv_attachments(self):
-        """Connects to POP3 server, iterates through messages, and saves CSV attachments."""
+        """Connects to IMAP server, iterates through messages, and saves CSV attachments."""
         print(f"DEBUG: Attempting to connect to host: '{self.host}'")
-        server = poplib.POP3_SSL(self.host)
         try:
-            server.user(self.user)
-            server.pass_(self.password)
+            mail = imaplib.IMAP4_SSL(self.host)
+            mail.login(self.user, self.password)
+            mail.select('inbox')
 
-            # POP3 typically retrieves all messages in the inbox. 
-            # Status 'unread' is usually handled by deleting after download or tracking IDs.
-            num_messages = len(server.list()[1])
-            
-            for i in range(1, num_messages + 1):
-                # Retrieve the message lines and join them into bytes
-                resp, lines, octets = server.retr(i)
-                raw_email = b"\n".join(lines)
-                
+            typ, data = mail.search(None, 'ALL')
+            if typ != 'OK':
+                print("No messages found!")
+                return
+
+            msg_ids = data[0].split()
+            print(f"DEBUG: Found {len(msg_ids)} messages.")
+
+            for num in msg_ids:
+                typ, msg_data = mail.fetch(num, '(RFC822)')
+                if typ != 'OK':
+                    print(f"Error fetching message {num}")
+                    continue
+
+                raw_email = msg_data[0][1]
                 msg = email.message_from_bytes(raw_email, policy=policy.default)
 
                 for part in msg.walk():
@@ -41,6 +47,7 @@ class EmailCSVDownloader:
                     
                     filename = part.get_filename()
                     if filename and filename.lower().endswith('.csv'):
+                        print(f"DEBUG: Found CSV attachment: {filename}")
                         filepath = os.path.join(self.save_dir, filename)
                         
                         # Ensure a unique filename to avoid overwriting
@@ -52,10 +59,13 @@ class EmailCSVDownloader:
 
                         with open(filepath, 'wb') as f:
                             f.write(part.get_payload(decode=True))
-                
-                # server.dele(i) # Uncomment this if you want to mark as 'read' by deleting from server
-        finally:
-            server.quit()
+                        print(f"DEBUG: Saved {filepath}")
+            
+            mail.close()
+            mail.logout()
+        except Exception as e:
+            print(f"Error during IMAP download: {e}")
+            raise e
 
 
 

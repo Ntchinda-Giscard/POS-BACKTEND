@@ -6,7 +6,7 @@ import time
 import csv
 from sqlalchemy import MetaData, select, update, insert, and_
 from session import SessionLocal, engine
-from models import POPConfig
+from models import POPConfig, FolderConfig
 
 
 class EmailCSVDownloader:
@@ -16,7 +16,7 @@ class EmailCSVDownloader:
         self.password = password
         self.save_dir = save_dir
         if not os.path.exists(self.save_dir):
-            os.makedirs(self.save_dir)
+            os.makedirs(self.save_dir)  
 
     def download_csv_attachments(self):
         """Connects to IMAP server, iterates through messages, and saves CSV attachments."""
@@ -74,8 +74,11 @@ class EmailCSVDownloader:
 
     def process_csv(self, filepath):
         """
-        Reads the CSV file, identifies the table from the first column of each row,
-        and upserts data into the SQLite database.
+        Reads the CSV file where:
+        - First row contains column headers (TABLE_NAME, col1, col2, ...)
+        - Subsequent rows contain: table_name, val1, val2, ...
+        - All tables use AUUID_0 as the primary key
+        - Performs upsert based on AUUID_0
         """
         print(f"DEBUG: Processing CSV {filepath} for database sync...")
         metadata = MetaData()
@@ -89,65 +92,82 @@ class EmailCSVDownloader:
             try:
                 with open(filepath, 'r', newline='', encoding='utf-8') as f:
                     reader = csv.reader(f)
-                    for row_idx, row in enumerate(reader):
+                    
+                    # Read header row to get column names
+                    header = next(reader, None)
+                    if not header:
+                        print("Warning: CSV file is empty")
+                        return
+                    
+                    # Header format: TABLE_NAME, col1, col2, col3, ...
+                    column_names = [col.strip() for col in header[1:]]  # Skip first column (TABLE_NAME)
+                    
+                    print(f"DEBUG: CSV columns: {column_names}")
+                    
+                    for row_idx, row in enumerate(reader, start=2):  # Start at 2 since header is row 1
                         if not row:
                             continue
                         
-                        # Assumption: First column is table name
+                        # First column is the table name
                         table_name = row[0].strip()
                         values = row[1:]
                         
                         if table_name not in metadata.tables:
-                            print(f"Warning: Table '{table_name}' not found in database (Row {row_idx+1}). Skipping.")
+                            print(f"Warning: Table '{table_name}' not found in database (Row {row_idx}). Skipping.")
                             continue
                         
                         table = metadata.tables[table_name]
-                        columns = list(table.columns)
                         
-                        if len(values) != len(columns):
+                        if len(values) != len(column_names):
                             print(f"Warning: Column count mismatch for table '{table_name}'. "
-                                  f"CSV has {len(values)} value columns, Table has {len(columns)} columns. "
-                                  f"(Row {row_idx+1}). Skipping.")
+                                  f"CSV has {len(values)} values, Header has {len(column_names)} columns. "
+                                  f"(Row {row_idx}). Skipping.")
                             continue
                         
                         # Map values to column names
                         row_data = {}
-                        pk_clauses = []
+                        auuid_value = None
                         
-                        for i, col in enumerate(columns):
-                            val = values[i]
-                            # TODO: Type conversion could be added here if needed
-                            row_data[col.name] = val
+                        for i, col_name in enumerate(column_names):
+                            val = values[i].strip()
                             
-                            if col.primary_key:
-                                pk_clauses.append(col == val)
+                            # Handle empty strings
+                            if val == '':
+                                val = None
+                            
+                            row_data[col_name] = val
+                            
+                            # Track AUUID_0 value (primary key)
+                            if col_name == 'AUUID_0':
+                                auuid_value = val
                         
-                        if not pk_clauses:
-                            # Table without PK - fallback to Insert only (potential duplicates)
-                            try:
-                                conn.execute(insert(table).values(row_data))
-                            except Exception as e:
-                                print(f"Error inserting into '{table_name}': {e}")
+                        if auuid_value is None:
+                            print(f"Warning: AUUID_0 not found or is NULL for table '{table_name}' (Row {row_idx}). Skipping.")
                             continue
                         
-                        # Check if record exists
+                        # Check if record exists based on AUUID_0
                         try:
-                            stmt = select(table).where(and_(*pk_clauses))
+                            if 'AUUID_0' not in table.columns:
+                                print(f"Warning: Table '{table_name}' does not have AUUID_0 column (Row {row_idx}). Skipping.")
+                                continue
+                            
+                            pk_column = table.columns['AUUID_0']
+                            stmt = select(table).where(pk_column == auuid_value)
                             result = conn.execute(stmt).fetchone()
                             
                             if result:
-                                # Update
-                                update_stmt = update(table).where(and_(*pk_clauses)).values(row_data)
+                                # Update existing record
+                                update_stmt = update(table).where(pk_column == auuid_value).values(row_data)
                                 conn.execute(update_stmt)
-                                print(f"DEBUG: Updated {table_name} record {pk_clauses}")
+                                print(f"DEBUG: Updated {table_name} record with AUUID_0={auuid_value}")
                             else:
-                                # Insert
+                                # Insert new record
                                 insert_stmt = insert(table).values(row_data)
                                 conn.execute(insert_stmt)
-                                print(f"DEBUG: Inserted {table_name} record {pk_clauses}")
+                                print(f"DEBUG: Inserted {table_name} record with AUUID_0={auuid_value}")
                                 
                         except Exception as e:
-                            print(f"Error upserting row {row_idx+1} into '{table_name}': {e}")
+                            print(f"Error upserting row {row_idx} into '{table_name}': {e}")
                             
                 conn.commit()
                 print(f"DEBUG: Finished processing {filepath}")
@@ -155,9 +175,7 @@ class EmailCSVDownloader:
                 print(f"Error processing CSV file {filepath}: {e}")
 
 
-
-
-def run_periodic_download(host, user, password, save_dir, interval=3600):
+def run_periodic_download(host, user, password, save_dir, interval=60):
     """Periodically instantiates the downloader and fetches CSV attachments."""
     downloader = EmailCSVDownloader(host, user, password, save_dir)
     while True:
@@ -171,6 +189,8 @@ def run_periodic_download(host, user, password, save_dir, interval=3600):
 if __name__ == "__main__":
     db = SessionLocal()
     email_config = db.query(POPConfig).first()
+    sqlite_db = db.query(FolderConfig).first()
+    print(f"sqlite_db.path: {sqlite_db.path}")
     print(email_config)
     run_periodic_download(
         host=email_config.server,

@@ -38,7 +38,3 @@ def get_db_file(db: Session) -> str | None:
         else:
             logger.warning(f"The path in the database config is not a valid .db file: {db_path}")
     return None
-
-
-
-

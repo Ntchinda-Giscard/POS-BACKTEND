@@ -10,11 +10,12 @@ from models import POPConfig, FolderConfig
 
 
 class EmailCSVDownloader:
-    def __init__(self, host, user, password, save_dir):
+    def __init__(self, host, user, password, save_dir, target_db_path):
         self.host = host
         self.user = user
         self.password = password
         self.save_dir = save_dir
+        self.target_db_path = target_db_path
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)  
 
@@ -81,14 +82,20 @@ class EmailCSVDownloader:
         - Performs upsert based on AUUID_0
         """
         print(f"DEBUG: Processing CSV {filepath} for database sync...")
+        
+        # Create engine for the TARGET database (not the config database)
+        from sqlalchemy import create_engine
+        target_engine = create_engine(f'sqlite:///{self.target_db_path}')
+        
         metadata = MetaData()
         try:
-            metadata.reflect(bind=engine)
+            metadata.reflect(bind=target_engine)
+            print(f"DEBUG: Available tables in database: {list(metadata.tables.keys())}")
         except Exception as e:
             print(f"Error reflecting database metadata: {e}")
             return
 
-        with engine.connect() as conn:
+        with target_engine.connect() as conn:
             try:
                 with open(filepath, 'r', newline='', encoding='utf-8') as f:
                     reader = csv.reader(f)
@@ -112,11 +119,20 @@ class EmailCSVDownloader:
                         table_name = row[0].strip()
                         values = row[1:]
                         
-                        if table_name not in metadata.tables:
-                            print(f"Warning: Table '{table_name}' not found in database (Row {row_idx}). Skipping.")
+                        print(f"DEBUG: Processing table '{table_name}' from row {row_idx}")
+                        
+                        # Try to find table (case-insensitive)
+                        actual_table_name = None
+                        for db_table in metadata.tables.keys():
+                            if db_table.upper() == table_name.upper():
+                                actual_table_name = db_table
+                                break
+                        
+                        if actual_table_name is None:
+                            print(f"Warning: Table '{table_name}' not found in database (Row {row_idx}). Available tables: {list(metadata.tables.keys())}. Skipping.")
                             continue
                         
-                        table = metadata.tables[table_name]
+                        table = metadata.tables[actual_table_name]
                         
                         if len(values) != len(column_names):
                             print(f"Warning: Column count mismatch for table '{table_name}'. "
@@ -175,9 +191,9 @@ class EmailCSVDownloader:
                 print(f"Error processing CSV file {filepath}: {e}")
 
 
-def run_periodic_download(host, user, password, save_dir, interval=60):
+def run_periodic_download(host, user, password, save_dir, target_db_path, interval=60):
     """Periodically instantiates the downloader and fetches CSV attachments."""
-    downloader = EmailCSVDownloader(host, user, password, save_dir)
+    downloader = EmailCSVDownloader(host, user, password, save_dir, target_db_path)
     while True:
         try:
             downloader.download_csv_attachments()
@@ -190,12 +206,13 @@ if __name__ == "__main__":
     db = SessionLocal()
     email_config = db.query(POPConfig).first()
     sqlite_db = db.query(FolderConfig).first()
-    print(f"sqlite_db.path: {sqlite_db.path}")
-    print(email_config)
+    print(f"Target database path: {sqlite_db.path}")
+    print(f"Email config: {email_config}")
     run_periodic_download(
         host=email_config.server,
         user=email_config.username,
         password=email_config.password,
         save_dir="./attachments",
-        interval=60  # 1 hour
+        target_db_path=sqlite_db.path,  # Pass the target database path
+        interval=3600  # 1 hour
     )

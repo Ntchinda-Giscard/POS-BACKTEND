@@ -202,17 +202,18 @@ def run_periodic_download(host, user, password, save_dir, target_db_path, interv
         time.sleep(interval)
 
 
-if __name__ == "__main__":
+def sync_emails():
     db = SessionLocal()
     email_config = db.query(POPConfig).first()
     sqlite_db = db.query(FolderConfig).first()
-        print(f"Target database path: {sqlite_db.path}")
-        print(f"Email config: {email_config}")
-        run_periodic_download(
+    db.close()
+    print(f"Target database path: {sqlite_db.path}")
+    print(f"Email config: {email_config}")
+    run_periodic_download(
             host=email_config.server,
             user=email_config.username,
             password=email_config.password,
             save_dir="./attachments",
             target_db_path=sqlite_db.path,  # Pass the target database path
             interval=3600  # 1 hour
-        )
+    )

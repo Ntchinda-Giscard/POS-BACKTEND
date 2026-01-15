@@ -48,8 +48,8 @@ def get_articles_site(input: ArticleInput, db: Session) -> List[ArticleRequest]:
     for article in articles:
         raw_img = article[5]  # BLOB column
 
-    if raw_img is None:
-        img_b64 = None
+        if raw_img is None:
+            img_b64 = None
 
         elif isinstance(raw_img, bytes):
             # ✅ Correct case

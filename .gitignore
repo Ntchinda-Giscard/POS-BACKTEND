@@ -190,4 +190,4 @@ Desktop.ini
 # config.py
 secrets.json
 data/
-logs/
+logs/sagex3_seed.db

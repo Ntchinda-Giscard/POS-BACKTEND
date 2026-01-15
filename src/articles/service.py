@@ -3,6 +3,8 @@ from typing import Dict, List
 import base64
 from database.sync_data import get_db_file
 from sqlalchemy.orm import Session
+import ast
+
 # from src.articles.model import ArticleInput
 
 from ..articles.model import ArticleInput, ArticleRequest
@@ -52,16 +54,21 @@ def get_articles_site(input: ArticleInput, db: Session) -> List[ArticleRequest]:
             img_b64 = None
 
         elif isinstance(raw_img, bytes):
-            # ✅ Correct case
             img_b64 = base64.b64encode(raw_img).decode("ascii")
 
         elif isinstance(raw_img, str):
-            # ⚠️ DB returned stringified bytes → convert back
-            raw_img_bytes = ast.literal_eval(raw_img)
-            img_b64 = base64.b64encode(raw_img_bytes).decode("ascii")
+            try:
+                raw_img_bytes = ast.literal_eval(raw_img)
+                if isinstance(raw_img_bytes, (bytes, bytearray)):
+                    img_b64 = base64.b64encode(raw_img_bytes).decode("ascii")
+                else:
+                    img_b64 = None
+            except Exception:
+                img_b64 = None
 
         else:
             img_b64 = None
+
 
 
         results.append(ArticleRequest(

@@ -61,7 +61,7 @@ def get_articles_site(input: ArticleInput, db: Session) -> List[ArticleRequest]:
             img_b64 = base64.b64encode(raw_img_bytes).decode("ascii")
 
         else:
-        img_b64 = None
+            img_b64 = None
 
 
         results.append(ArticleRequest(

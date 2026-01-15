@@ -19,11 +19,13 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-def get_regime_taxe(customer_code: str) -> TaxeResponse:
+from sqlalchemy.orm import Session
+
+def get_regime_taxe(customer_code: str, db: Session) -> TaxeResponse:
     """Fetch tax regime from the database."""
     # Simulated database fetch
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor() 
     cursor.execute("""

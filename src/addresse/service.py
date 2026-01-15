@@ -6,7 +6,7 @@ from ..addresse.model import AddressInput, AddressLivrasonREsponse, AddressReque
 from sqlalchemy.orm import Session
 
 
-def get_adresse_vente(db) -> List[AddressRequest]:
+def get_adresse_vente(db: Session) -> List[AddressRequest]:
     """  """
     db_path = ""
     db_path = get_db_file(db)

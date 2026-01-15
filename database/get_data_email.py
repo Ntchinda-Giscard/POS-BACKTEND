@@ -96,6 +96,8 @@ class EmailCSVDownloader:
             return
 
         with target_engine.connect() as conn:
+            from sqlalchemy import text
+            conn.execute(text("PRAGMA journal_mode=WAL;"))
             try:
                 with open(filepath, 'r', newline='', encoding='utf-8') as f:
                     reader = csv.reader(f)

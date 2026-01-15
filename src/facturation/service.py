@@ -15,11 +15,13 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-def get_payment_methode(customer_code: str) -> PayementMode:
+from sqlalchemy.orm import Session
+
+def get_payment_methode(customer_code: str, db: Session) -> PayementMode:
     """  """
 
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
     cursor.execute("SELECT  PTE_0 FROM BPCUSTOMER WHERE BPCNUM_0 = ?", (customer_code, ))
@@ -30,10 +32,10 @@ def get_payment_methode(customer_code: str) -> PayementMode:
 
     return PayementMode(code= row[0])
 
-def get_escomte(customer_code: str) -> Escomte:
+def get_escomte(customer_code: str, db: Session) -> Escomte:
 
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
 
     cursor = sqlite_conn.cursor()
@@ -45,10 +47,10 @@ def get_escomte(customer_code: str) -> Escomte:
 
     return Escomte(code=row[0])
 
-def get_cond_fac(customer_code: str) -> CondFacResponse:
+def get_cond_fac(customer_code: str, db: Session) -> CondFacResponse:
 
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
 
@@ -60,10 +62,10 @@ def get_cond_fac(customer_code: str) -> CondFacResponse:
 
     return CondFacResponse(code=row[0])
 
-def get_element_facturation(customer_code: str) -> List[ElementFacturation]:
+def get_element_facturation(customer_code: str, db: Session) -> List[ElementFacturation]:
 
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     result = []
     cursor = sqlite_conn.cursor()

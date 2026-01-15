@@ -17,11 +17,12 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-def get_command_types() -> List[CommandTypeRRequest]:
+from sqlalchemy.orm import Session
+def get_command_types(db: Session = None) -> List[CommandTypeRRequest]:
     """Fetch command types from the database."""
 
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     result = []
     cursor = sqlite_conn.cursor()
@@ -33,7 +34,7 @@ def get_command_types() -> List[CommandTypeRRequest]:
     sqlite_conn.close()
     return result
 
-def create_commande(inputs: CreateCommandRequest):
+def create_commande(inputs: CreateCommandRequest, db: Session):
     """Create a new command in the database."""
     sorder_auuid = uuid.uuid4()
     sorder_binary_id = sorder_auuid.bytes
@@ -87,7 +88,7 @@ def create_commande(inputs: CreateCommandRequest):
         """
     
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
 

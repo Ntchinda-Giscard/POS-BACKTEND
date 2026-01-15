@@ -46,13 +46,22 @@ def get_articles_site(input: ArticleInput, db: Session) -> List[ArticleRequest]:
     sqlite_conn.close()
 
     for article in articles:
-        raw_img = article[5]   # BLOB from DB
-        if raw_img:
-            if isinstance(raw_img, str):
-                raw_img = raw_img.encode("utf-8")
-            img_b64 = base64.b64encode(raw_img).decode("utf-8")
+        raw_img = article[5]  # BLOB column
+
+    if raw_img is None:
+        img_b64 = None
+
+        elif isinstance(raw_img, bytes):
+            # ✅ Correct case
+            img_b64 = base64.b64encode(raw_img).decode("ascii")
+
+        elif isinstance(raw_img, str):
+            # ⚠️ DB returned stringified bytes → convert back
+            raw_img_bytes = ast.literal_eval(raw_img)
+            img_b64 = base64.b64encode(raw_img_bytes).decode("ascii")
+
         else:
-            img_b64 = None
+        img_b64 = None
 
 
         results.append(ArticleRequest(

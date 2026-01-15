@@ -4,9 +4,10 @@ import email
 from email import policy
 import time
 import csv
-from sqlalchemy import MetaData, select, update, insert, and_
-from session import SessionLocal, engine
-from models import POPConfig, FolderConfig
+import csv
+from sqlalchemy import MetaData, select, update, insert, and_, create_engine
+from .session import SessionLocal, engine
+from .models import POPConfig, FolderConfig
 
 
 class EmailCSVDownloader:
@@ -84,7 +85,6 @@ class EmailCSVDownloader:
         print(f"DEBUG: Processing CSV {filepath} for database sync...")
         
         # Create engine for the TARGET database (not the config database)
-        from sqlalchemy import create_engine
         target_engine = create_engine(f'sqlite:///{self.target_db_path}')
         
         metadata = MetaData()
@@ -206,13 +206,13 @@ if __name__ == "__main__":
     db = SessionLocal()
     email_config = db.query(POPConfig).first()
     sqlite_db = db.query(FolderConfig).first()
-    print(f"Target database path: {sqlite_db.path}")
-    print(f"Email config: {email_config}")
-    run_periodic_download(
-        host=email_config.server,
-        user=email_config.username,
-        password=email_config.password,
-        save_dir="./attachments",
-        target_db_path=sqlite_db.path,  # Pass the target database path
-        interval=3600  # 1 hour
-    )
+        print(f"Target database path: {sqlite_db.path}")
+        print(f"Email config: {email_config}")
+        run_periodic_download(
+            host=email_config.server,
+            user=email_config.username,
+            password=email_config.password,
+            save_dir="./attachments",
+            target_db_path=sqlite_db.path,  # Pass the target database path
+            interval=3600  # 1 hour
+        )

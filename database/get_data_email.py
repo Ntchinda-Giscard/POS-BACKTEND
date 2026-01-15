@@ -28,7 +28,7 @@ class EmailCSVDownloader:
             mail.login(self.user, self.password)
             mail.select('inbox')
 
-            typ, data = mail.search(None, 'ALL')
+            typ, data = mail.search(None, 'SEEN')
             if typ != 'OK':
                 print("No messages found!")
                 return

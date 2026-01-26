@@ -17,6 +17,6 @@ def read_transporteur():
     return get_transporteur()
 
 
-@router.get("/livraison", response_model=list[LivraisonRequest])
+@router.get("/livraison")
 def read_livraison():
     return get_livraison()

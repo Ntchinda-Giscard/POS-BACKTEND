@@ -1,5 +1,5 @@
 import sqlite3
-from typing import Dict, List
+from typing import Dict, List, Optional
 import base64
 from database.sync_data import get_db_file
 from sqlalchemy.orm import Session
@@ -24,7 +24,6 @@ def get_articles_site(input: ArticleInput, db: Session) -> List[ArticleRequest]:
             T4.TCLCOD_0,
             T3.BASPRI_0,
             T4.SAU_0,
-            T5.BLOB_0,
             SUM(T2.QTYSTUACT_0) AS StockActif
         FROM
         ITMFACILIT AS T1
@@ -32,7 +31,6 @@ def get_articles_site(input: ArticleInput, db: Session) -> List[ArticleRequest]:
         AND T1.STOFCY_0 = T2.STOFCY_0
         LEFT JOIN ITMSALES AS T3 ON T1.ITMREF_0 = T3.ITMREF_0
         LEFT JOIN ITMMASTER AS T4 ON T4.ITMREF_0 = T3.ITMREF_0
-        LEFT JOIN CBLOB AS T5 ON T4.ITMREF_0 = T5.IDENT1_0
         WHERE
         T1.STOFCY_0 = ?
         GROUP BY
@@ -40,45 +38,21 @@ def get_articles_site(input: ArticleInput, db: Session) -> List[ArticleRequest]:
             T3.ITMDES1_0,
             T4.TCLCOD_0,
             T3.BASPRI_0,
-            T4.SAU_0,
-            T5.BLOB_0
+            T4.SAU_0
     """, (input.site_id,))
     
     articles = sqlite_cursor.fetchall()
     sqlite_conn.close()
 
     for article in articles:
-        raw_img = article[5]  # BLOB column
-
-        if raw_img is None:
-            img_b64 = None
-
-        elif isinstance(raw_img, bytes):
-            img_b64 = base64.b64encode(raw_img).decode("ascii")
-
-        elif isinstance(raw_img, str):
-            try:
-                raw_img_bytes = ast.literal_eval(raw_img)
-                if isinstance(raw_img_bytes, (bytes, bytearray)):
-                    img_b64 = base64.b64encode(raw_img_bytes).decode("ascii")
-                else:
-                    img_b64 = None
-            except Exception:
-                img_b64 = None
-
-        else:
-            img_b64 = None
-
-
-
         results.append(ArticleRequest(
             item_code=article[0],
             describtion=article[1] or "",
             categorie=article[2],
             base_price=article[3] or 0.0,
             unit_sales=article[4] or "",
-            image=img_b64,   
-            stock=article[6] or 0.0,
+            image=None,   
+            stock=article[5] or 0.0,
         ))
 
     return results
@@ -129,3 +103,39 @@ GROUP BY
             stock=article[5] if article[5] is not None else 0.0,
         ))
     return results
+
+
+def get_article_image(item_code: str, db: Session) -> Optional[str]:
+    db_path = get_db_file(db)
+    sqlite_conn = sqlite3.connect(db_path)
+    sqlite_cursor = sqlite_conn.cursor()
+    
+    sqlite_cursor.execute("""
+        SELECT BLOB_0 
+        FROM CBLOB 
+        WHERE IDENT1_0 = ?
+    """, (item_code,))
+    
+    result = sqlite_cursor.fetchone()
+    sqlite_conn.close()
+    
+    if not result:
+        return None
+        
+    raw_img = result[0]
+    
+    if raw_img is None:
+        return None
+        
+    if isinstance(raw_img, bytes):
+        return base64.b64encode(raw_img).decode("ascii")
+        
+    if isinstance(raw_img, str):
+        try:
+            raw_img_bytes = ast.literal_eval(raw_img)
+            if isinstance(raw_img_bytes, (bytes, bytearray)):
+                return base64.b64encode(raw_img_bytes).decode("ascii")
+        except Exception:
+            return None
+            
+    return None

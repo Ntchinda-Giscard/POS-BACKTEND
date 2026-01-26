@@ -2,7 +2,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from database.session import get_db
-from .service import get_articles_site, search_article
+from .service import get_articles_site, search_article, get_article_image
 from .model import ArticleInput, ArticleRequest  # Make sure ArticleRequest is defined in schemas.py
 
 
@@ -22,5 +22,12 @@ def search_articles(sitde_id: str, q: Optional[str]=None, db: Session = Depends(
     query = "" if q == None else q 
 
     return search_article(sitde_id, q=f"%{query}%", db=db)
+
+
+@router.get("/{item_code}/image")
+def get_image(item_code: str, db: Session = Depends(get_db)):
+    image_data = get_article_image(item_code, db)
+    return {"image": image_data}
+
 
 

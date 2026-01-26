@@ -1,4 +1,3 @@
-from unittest import result
 from .model import ModeDeLivraisonRequest, TransPorteurResponse
 import sqlite3
 from typing import List
@@ -54,3 +53,25 @@ def get_transporteur() -> List[TransPorteurResponse]:
         results.append(transporteur)
     sqlite_conn.close()
     return results
+
+
+def get_livraison():
+
+    db_path = ""
+    db_path = get_db_file()
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
+    results = []
+    cursor = sqlite_conn.cursor()
+    cursor.execute("SELECT * FROM SDELIVERY")
+
+    for row in cursor.fetchall():
+        logger.debug(f"Fetched livraison row: {row}")
+        livraison = LivraisonRequest(
+            code=row[0],
+            description=row[1]
+        )
+        results.append(livraison)
+    sqlite_conn.close()
+    logger.debug(f"Fetched livraison rows: {results}")
+    return results
+    

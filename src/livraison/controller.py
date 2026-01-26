@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from .model import ModeDeLivraisonRequest, TransPorteurResponse
-from .service import get_mode_livraison, get_transporteur
+from .service import get_mode_livraison, get_transporteur, get_livraison
 
 
 router = APIRouter(
@@ -15,3 +15,8 @@ def read_mode_livraison():
 @router.get("/transporteur", response_model=list[TransPorteurResponse])
 def read_transporteur():
     return get_transporteur()
+
+
+@router.get("/livraison", response_model=list[LivraisonRequest])
+def read_livraison():
+    return get_livraison()

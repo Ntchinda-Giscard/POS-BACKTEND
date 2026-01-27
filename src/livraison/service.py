@@ -4,6 +4,8 @@ from typing import List
 from database.sync_data import get_db_file
 import logging
 import sys
+from sqlalchemy.orm import Session
+
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -55,10 +57,10 @@ def get_transporteur() -> List[TransPorteurResponse]:
     return results
 
 
-def get_livraison():
+def get_livraison(db: Session):
 
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     results = []
     cursor = sqlite_conn.cursor()
@@ -66,10 +68,10 @@ def get_livraison():
 
     for row in cursor.fetchall():
         logger.debug(f"Fetched livraison row: {row}")
-        livraison = LivraisonRequest(
-            code=row[0],
-            description=row[1]
-        )
+        livraison = {
+            'code': row[0],
+            'description': row[1]
+        }
         results.append(livraison)
     sqlite_conn.close()
     logger.debug(f"Fetched livraison rows: {results}")

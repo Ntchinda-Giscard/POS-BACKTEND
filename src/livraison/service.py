@@ -68,7 +68,7 @@ def get_livraison(db: Session):
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     results = []
     cursor = sqlite_conn.cursor()
-    cursor.execute("SELECT SHIDAT_0, DLVDAT_0, BPDNAM_0, SOHNUM_0, STOFCY_0, SDHTYP_0, ADRVAL_0 FROM SDELIVERY")
+    cursor.execute("SELECT SHIDAT_0, DLVDAT_0, BPDNAM_0, SOHNUM_0, STOFCY_0, SDHTYP_0, INVFLG_0 FROM SDELIVERY")
 
     for row in cursor.fetchall():
         logger.debug(f"Fetched livraison row: {row}")

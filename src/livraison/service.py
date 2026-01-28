@@ -83,4 +83,22 @@ def get_livraison(db: Session):
     sqlite_conn.close()
     logger.debug(f"Fetched livraison rows: {results}")
     return results
-    
+
+
+def get_livraison_type(db: Session):
+    db_path = ""
+    db_path = get_db_file(db)
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
+    results = []
+    cursor = sqlite_conn.cursor()
+    cursor.execute("SELECT SDHTYP_0 FROM TABSDHTYP")
+
+    for row in cursor.fetchall():
+        logger.debug(f"Fetched livraison type row: {row}")
+        livraison_type = LivraisonType(
+            code=row[0]
+        )
+        results.append(livraison_type)
+    sqlite_conn.close()
+    logger.debug(f"Fetched livraison type rows: {results}")
+    return results

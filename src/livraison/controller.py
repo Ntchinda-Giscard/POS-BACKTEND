@@ -23,6 +23,6 @@ def read_livraison( db: Session = Depends(get_db)):
     return get_livraison(db)
 
 @router.get("/type", response_model=list[LivraisonType])
-def read_livraison_type():
-    return get_livraison_type()
+def read_livraison_type(db: Session = Depends(get_db)):
+    return get_livraison_type(db)
 

@@ -70,7 +70,7 @@ def get_livraison(db: Session):
         logger.debug(f"Fetched livraison row: {row}")
         livraison = LivraisonHeader(
             date_expedition=row[0],
-            date_expedition=row[1],
+            date_livraison=row[1],
             client_livre=row[2],
             commande_livre=row[3],
             site_vente=row[4],

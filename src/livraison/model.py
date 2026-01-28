@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from uuid import UUID
 
 class ModeDeLivraisonRequest(BaseModel):
     code: str
@@ -10,7 +11,7 @@ class TransPorteurResponse(BaseModel):
 
 
 class LivraisonHeader(BaseModel):
-    code: Optional[str]
+    id: UUID.uuid4()
     description: Optional[str]
     type: Optional[str]
     date_expedition: Optional[str]

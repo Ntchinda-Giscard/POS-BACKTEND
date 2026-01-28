@@ -5,6 +5,7 @@ from database.sync_data import get_db_file
 import logging
 import sys
 from sqlalchemy.orm import Session
+from uuid import uuid4
 
 
 logging.basicConfig(
@@ -69,6 +70,7 @@ def get_livraison(db: Session):
     for row in cursor.fetchall():
         logger.debug(f"Fetched livraison row: {row}")
         livraison = LivraisonHeader(
+            id=uuid4(),
             date_expedition=row[0],
             date_livraison=row[1],
             client_livre=row[2],

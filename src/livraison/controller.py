@@ -18,6 +18,6 @@ def read_transporteur():
     return get_transporteur()
 
 
-@router.get("/livraison")
+@router.get("/all")
 def read_livraison( db: Session = Depends(get_db)):
     return get_livraison(db)

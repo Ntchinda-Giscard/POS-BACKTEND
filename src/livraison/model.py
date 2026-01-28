@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class ModeDeLivraisonRequest(BaseModel):
     code: str
@@ -9,13 +10,14 @@ class TransPorteurResponse(BaseModel):
 
 
 class LivraisonHeader(BaseModel):
-    code: str
-    description: str
-    type: str
-    date_expedition: str
-    date_livraison: str
-    client_livre: str
+    code: Optional[str]
+    description: Optional[str]
+    type: Optional[str]
+    date_expedition: Optional[str]
+    date_livraison: Optional[str]
+    client_livre: Optional[str]
     commande_livre: str
-    
+    site_vente: Optional[str]
+    statut: Optional[str]
     
     

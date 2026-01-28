@@ -1,4 +1,4 @@
-from .model import ModeDeLivraisonRequest, TransPorteurResponse
+from .model import ModeDeLivraisonRequest, TransPorteurResponse, LivraisonHeader
 import sqlite3
 from typing import List
 from database.sync_data import get_db_file
@@ -64,16 +64,19 @@ def get_livraison(db: Session):
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     results = []
     cursor = sqlite_conn.cursor()
-    cursor.execute("SELECT SHIDAT_0, DLVDAT_0, BPDNAM_0, SOHNUM_0 FROM SDELIVERY")
+    cursor.execute("SELECT SHIDAT_0, DLVDAT_0, BPDNAM_0, SOHNUM_0, STOFCY_0, SDHTYP_0, ADRVAL_0 FROM SDELIVERY")
 
     for row in cursor.fetchall():
         logger.debug(f"Fetched livraison row: {row}")
-        livraison = {
-            'code': row[0],
-            'date_expedition': row[1],
-            'client_livre': row[2],
-            'commande_livre': row[3]
-        }
+        livraison = LivraisonHeader(
+            date_expedition=row[0],
+            date_expedition=row[1],
+            client_livre=row[2],
+            commande_livre=row[3],
+            site_vente=row[4],
+            type=row[5],
+            statut=row[6]
+        )
         results.append(livraison)
     sqlite_conn.close()
     logger.debug(f"Fetched livraison rows: {results}")

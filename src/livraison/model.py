@@ -12,7 +12,6 @@ class TransPorteurResponse(BaseModel):
 
 class LivraisonHeader(BaseModel):
     id: UUID
-    description: Optional[str]
     type: Optional[str]
     date_expedition: Optional[str]
     date_livraison: Optional[str]

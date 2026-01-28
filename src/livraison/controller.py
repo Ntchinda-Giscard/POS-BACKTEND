@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
-from .model import ModeDeLivraisonRequest, TransPorteurResponse
-from .service import get_mode_livraison, get_transporteur, get_livraison
+from .model import ModeDeLivraisonRequest, TransPorteurResponse, LivraisonType
+from .service import get_mode_livraison, get_transporteur, get_livraison, get_livraison_type
 from database.session import get_db
 from sqlalchemy.orm import Session
 
@@ -21,3 +21,8 @@ def read_transporteur():
 @router.get("/all")
 def read_livraison( db: Session = Depends(get_db)):
     return get_livraison(db)
+
+@router.get("/type", response_model=list[LivraisonType])
+def read_livraison_type():
+    return get_livraison_type()
+

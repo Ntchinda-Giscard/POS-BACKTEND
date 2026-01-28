@@ -19,5 +19,9 @@ class LivraisonHeader(BaseModel):
     commande_livre: str
     site_vente: Optional[str]
     statut: Optional[str]
-    
+
+
+class LivraisonType(BaseModel):
+    code: str
+    description: str
     

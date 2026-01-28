@@ -94,13 +94,12 @@ def get_livraison_type(db: Session):
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     results = []
     cursor = sqlite_conn.cursor()
-    cursor.execute("SELECT SDHTYP_0, SHOAXX_0 FROM TABSDHTYP")
+    cursor.execute("SELECT SDHTYP_0 FROM TABSDHTYP")
 
     for row in cursor.fetchall():
         logger.debug(f"Fetched livraison type row: {row}")
         livraison_type = LivraisonType(
-            code=row[0],
-            description=row[1]
+            code=row[0]
         )
         results.append(livraison_type)
     sqlite_conn.close()

@@ -23,5 +23,4 @@ class LivraisonHeader(BaseModel):
 
 class LivraisonType(BaseModel):
     code: str
-    description: str
     

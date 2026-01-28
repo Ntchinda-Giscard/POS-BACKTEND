@@ -99,7 +99,8 @@ def get_livraison_type(db: Session):
     for row in cursor.fetchall():
         logger.debug(f"Fetched livraison type row: {row}")
         livraison_type = LivraisonType(
-            code=row[0]
+            code=row[0],
+            description=row[1]
         )
         results.append(livraison_type)
     sqlite_conn.close()

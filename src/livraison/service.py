@@ -1,7 +1,10 @@
 from .model import (ModeDeLivraisonRequest,
  TransPorteurResponse, 
  LivraisonHeader,
- LivraisonType)
+ LivraisonType,
+ CommandeLivraison,
+ CommandeQuantite
+ )
 import sqlite3
 from typing import List
 from database.sync_data import get_db_file
@@ -115,8 +118,16 @@ def get_commnde_livrison(db: Session):
     db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
-    cursor.execute("SELECT BPCINV_0, SOHNUM_0, BPCORD_0 FROM SORDER WHERE SOHNUM_0 NOT IN (SELECT SOHNUM_0 FROM SDELIVERY)")
+    cursor.execute("SELECT SOHNUM_0, BPCINV_0, BPCORD_0 FROM SORDER WHERE SOHNUM_0 NOT IN (SELECT SOHNUM_0 FROM SDELIVERY)")
     result = cursor.fetchall()
+    for row in result:
+        logger.debug(f"Fetched commande row: {row}")
+        commande = CommandeLivraison(
+            code=row[0],
+            client_livre=row[1],
+            client_comm=row[2]
+        )
+        result.append(commande)
     sqlite_conn.close()
     return result
 
@@ -129,8 +140,16 @@ def get_commant_quantite(db: Session, commande_number: str):
     db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
-    cursor.execute("SELECT QTY_0, ALLQTY_0 FROM SORDERQ WHERE SOHNUM_0 = ?", (commande_number,))
+    cursor.execute("SELECT SOHNUM_0, QTY_0, ALLQTY_0 FROM SORDERQ WHERE SOHNUM_0 = ?", (commande_number,))
     result = cursor.fetchall()
+    for row in result:
+        logger.debug(f"Fetched commande quantite row: {row}")
+        commande_quantite = CommandeQuantite(
+            code=row[0],
+            quantite=row[1],
+            quantite_total=row[2]
+        )
+        result.append(commande_quantite)
     sqlite_conn.close()
     return result
    

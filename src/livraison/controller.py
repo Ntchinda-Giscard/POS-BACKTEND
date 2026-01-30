@@ -1,6 +1,19 @@
 from fastapi import APIRouter, Depends
-from .model import ModeDeLivraisonRequest, TransPorteurResponse, LivraisonType
-from .service import get_mode_livraison, get_transporteur, get_livraison, get_livraison_type
+from .model import (
+    ModeDeLivraisonRequest, 
+    TransPorteurResponse, 
+    LivraisonType, 
+    CommandeLivraison,
+    CommandeQuantite
+)
+from .service import ( 
+    get_mode_livraison, 
+    get_transporteur, 
+    get_livraison, 
+    get_livraison_type, 
+    get_commnde_livrison,
+    get_commant_quantite
+)
 from database.session import get_db
 from sqlalchemy.orm import Session
 
@@ -25,4 +38,14 @@ def read_livraison( db: Session = Depends(get_db)):
 @router.get("/type", response_model=list[LivraisonType])
 def read_livraison_type(db: Session = Depends(get_db)):
     return get_livraison_type(db)
+
+
+@router.get("/commande", response_model=list[CommandeLivraison])
+def read_commande(db: Session = Depends(get_db)):
+    return get_commnde_livrison(db)
+
+@router.get("/commande/quantite", response_model=list[CommandeQuantite])
+def read_commande_quantite(db: Session = Depends(get_db)):
+    return get_commant_quantite(db)
+
 

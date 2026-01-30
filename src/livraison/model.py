@@ -23,4 +23,12 @@ class LivraisonHeader(BaseModel):
 
 class LivraisonType(BaseModel):
     code: str
-    
+
+
+class CommandeLivraison(BaseModel):
+    code: str
+    client_livre: str
+    client_comm: str
+
+class CommandeQuantite(BaseModel):
+    code: str

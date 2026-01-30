@@ -98,7 +98,7 @@ def get_livraison_type(db: Session):
 
     for row in cursor.fetchall():
         logger.debug(f"Fetched livraison type row: {row}")
-        livraison_type = Livra isonType(
+        livraison_type = LivraisonType(
             code=row[0]
         )
         results.append(livraison_type)

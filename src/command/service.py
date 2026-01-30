@@ -145,13 +145,14 @@ def create_commande(inputs: CreateCommandRequest, db: Session):
 
 def get_commnde_livrison(db: Session):
     """
-        Get all sorders that are linked to the sdelivery table
+        Get all sorders that don't have a delivery
     """
     db_path = ""
     db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
-    cursor.execute("SELECT BPCINV_0, SOHNUM_0, BPCORD_0 FROM SORDER WHERE SOHNUM_0 IN (SELECT SOHNUM_0 FROM SDELIVERY)")
+    cursor.execute("SELECT BPCINV_0, SOHNUM_0, BPCORD_0 FROM SORDER WHERE SOHNUM_0 NOT IN (SELECT SOHNUM_0 FROM SDELIVERY)")
     result = cursor.fetchall()
     sqlite_conn.close()
     return result
+   

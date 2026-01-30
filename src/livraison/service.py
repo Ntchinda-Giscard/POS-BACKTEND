@@ -140,9 +140,9 @@ def get_commant_quantite(db: Session, commande_number: str):
     db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
-    cursor.execute("SELECT SOHNUM_0, QTY_0, ALLQTY_0 FROM SORDERQ WHERE SOHNUM_0 = ?", (commande_number,))
-    result = cursor.fetchall()
-    for row in result:
+    cursor.execute("SELECT ITMREF_0, QTY_0, ALLQTY_0 FROM SORDERQ WHERE SOHNUM_0 = ?", (commande_number,))
+    result = []
+    for row in cursor.fetchall():
         logger.debug(f"Fetched commande quantite row: {row}")
         commande_quantite = CommandeQuantite(
             code=row[0],

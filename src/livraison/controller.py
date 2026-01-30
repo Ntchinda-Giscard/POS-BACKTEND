@@ -45,7 +45,9 @@ def read_commande(db: Session = Depends(get_db)):
     return get_commnde_livrison(db)
 
 @router.get("/commande/quantite", response_model=list[CommandeQuantite])
-def read_commande_quantite(db: Session = Depends(get_db)):
-    return get_commant_quantite(db)
+def read_commande_quantite(commande_number: str, db: Session = Depends(get_db)):
+    return get_commant_quantite(db, commande_number)
+
+
 
 

@@ -105,3 +105,18 @@ def get_livraison_type(db: Session):
     sqlite_conn.close()
     logger.debug(f"Fetched livraison type rows: {results}")
     return results
+
+
+def commande_livraison(db: Session):
+    db_path = ""
+    db_path = get_db_file(db)
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
+    results = []
+    cursor = sqlite_conn.cursor()
+    cursor.execute("SELECT SOHNUM_0 FROM SORDER WHERE SOHNUM_0 IN (SELECT SOHNUM_0 FROM SDELIVERY)")
+    for row in cursor.fetchall():
+        logger.debug(f"Fetched commande livraison row: {row}")
+        results.append(row[0])
+    sqlite_conn.close()
+    logger.debug(f"Fetched commande livraison rows: {results}")
+    return results

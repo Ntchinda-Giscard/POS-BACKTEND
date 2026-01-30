@@ -107,16 +107,30 @@ def get_livraison_type(db: Session):
     return results
 
 
-def commande_livraison(db: Session):
+def get_commnde_livrison(db: Session):
+    """
+        Get all sorders that don't have a delivery
+    """
     db_path = ""
     db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
-    results = []
     cursor = sqlite_conn.cursor()
-    cursor.execute("SELECT SOHNUM_0 FROM SORDER WHERE SOHNUM_0 IN (SELECT SOHNUM_0 FROM SDELIVERY)")
-    for row in cursor.fetchall():
-        logger.debug(f"Fetched commande livraison row: {row}")
-        results.append(row[0])
+    cursor.execute("SELECT BPCINV_0, SOHNUM_0, BPCORD_0 FROM SORDER WHERE SOHNUM_0 NOT IN (SELECT SOHNUM_0 FROM SDELIVERY)")
+    result = cursor.fetchall()
     sqlite_conn.close()
-    logger.debug(f"Fetched commande livraison rows: {results}")
-    return results
+    return result
+
+
+def get_commant_quantite(db: Session, commande_number: str):
+    """
+        Get all sorders line quantity
+    """
+    db_path = ""
+    db_path = get_db_file(db)
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
+    cursor = sqlite_conn.cursor()
+    cursor.execute("SELECT QTY_0, ALLQTY_0 FROM SORDERQ WHERE SOHNUM_0 = ?", (commande_number,))
+    result = cursor.fetchall()
+    sqlite_conn.close()
+    return result
+   

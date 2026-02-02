@@ -114,12 +114,14 @@ def get_commnde_livrison(db: Session):
     """
         Get all sorders that don't have a delivery
     """
+    results = []
     db_path = ""
     db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
     cursor.execute("SELECT SOHNUM_0, BPCINV_0, BPCORD_0 FROM SORDER WHERE SOHNUM_0 NOT IN (SELECT SOHNUM_0 FROM SDELIVERY)")
     result = cursor.fetchall()
+    logger.info(f"Lenght of result: {len(result)}")
     for row in result:
         logger.debug(f"Fetched commande row: {row}")
         commande = CommandeLivraison(
@@ -127,9 +129,9 @@ def get_commnde_livrison(db: Session):
             client_livre=row[1],
             client_comm=row[2]
         )
-        result.append(commande)
+        results.append(commande)
     sqlite_conn.close()
-    return result
+    return results
 
 
 def get_commant_quantite(db: Session, commande_number: str):

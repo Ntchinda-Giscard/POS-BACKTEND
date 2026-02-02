@@ -145,7 +145,7 @@ def get_commant_quantite(db: Session, commande_number: str):
     cursor.execute("""
     SELECT ITMMASTER.ITMREF_0, ITMMASTER.ITMDES1_0, SORDERQ.QTY_0, SORDERQ.ALLQTY_0 
 FROM SORDERQ
-JOIN ITMMASTER ON SORDERQ.ITMREF_0 = SORDERQ.ITMREF_0
+JOIN ITMMASTER ON SORDERQ.ITMREF_0 = ITMMASTER.ITMREF_0
     WHERE SOHNUM_0 = ?
      """, (commande_number,))
     result = []

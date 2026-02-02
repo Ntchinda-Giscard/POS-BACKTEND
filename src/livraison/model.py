@@ -32,3 +32,5 @@ class CommandeLivraison(BaseModel):
 
 class CommandeQuantite(BaseModel):
     code: str
+    quantite: float
+    quantite_total: float

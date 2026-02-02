@@ -11,3 +11,4 @@ class AddressInput(BaseModel):
 
 class AddressLivrasonREsponse(BaseModel):
     code: str
+    description: str

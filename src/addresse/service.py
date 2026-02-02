@@ -34,11 +34,12 @@ def get_adresse_livraison(code_clinet: str, db: Session) -> List[AddressLivrason
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
     result = []
-    cursor.execute("""SELECT BPAADD_0 FROM "BPADDRESS" WHERE "BPANUM_0" = ? """, (code_clinet,))
+    cursor.execute("""SELECT BPAADD_0, BPADES_0 FROM "BPADDRESS" WHERE "BPANUM_0" = ? """, (code_clinet,))
 
     for row in cursor.fetchall():
         address = AddressLivrasonREsponse(
-            code=row[0]
+            code=row[0],
+            description=row[1]
         )
         result.append(address)
 

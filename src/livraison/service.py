@@ -13,6 +13,7 @@ import logging
 import sys
 from sqlalchemy.orm import Session
 from uuid import uuid4
+from datetime import datetime
 
 
 logging.basicConfig(
@@ -34,7 +35,7 @@ def get_mode_livraison(db: Session) -> List[ModeDeLivraisonRequest]:
 
     results = []
     cursor = sqlite_conn.cursor()
-    cursor.execute("SELECT MDL_0 FROM TABMODELIV")
+    cursor.execute("SELECT DISTINCT MDL_0 FROM TABMODELIV")
 
     for row in cursor.fetchall():
         logger.debug(f"Fetched mode livraison row: {row}")
@@ -52,7 +53,7 @@ def get_transporteur(db: Session) -> List[TransPorteurResponse]:
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     results = []
     cursor = sqlite_conn.cursor()
-    cursor.execute("SELECT BPTNUM_0, BPTNAM_0 FROM BPCARRIER")
+    cursor.execute("SELECT DISTINCT BPTNUM_0, BPTNAM_0 FROM BPCARRIER")
 
     for row in cursor.fetchall():
         logger.debug(f"Fetched transporteur row: {row}")
@@ -98,7 +99,7 @@ def get_livraison_type(db: Session):
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     results = []
     cursor = sqlite_conn.cursor()
-    cursor.execute("SELECT SDHTYP_0 FROM TABSDHTYP")
+    cursor.execute("SELECT DISTINCT SDHTYP_0 FROM TABSDHTYP")
 
     for row in cursor.fetchall():
         logger.debug(f"Fetched livraison type row: {row}")
@@ -163,37 +164,71 @@ JOIN ITMMASTER ON SORDERQ.ITMREF_0 = ITMMASTER.ITMREF_0
     return result
 
 
-def add_livraison(db: Session, livraison: AddLivraisonRequest):
+def add_livraison(db: Session, request: AddLivraisonRequest):
     """
-        Add a new delivery into the SDELIVERY and SDELIVERYQ tables, 
-        that is the quantity of the delivery
+    Add a new delivery into the SDELIVERY and SDELIVERYD tables.
     """
-    db_path = ""
     db_path = get_db_file(db)
-    sqlite_conn = sqlite3.connect(db_path) # type: ignore
+    if not db_path:
+        raise Exception("Database path not found")
+        
+    sqlite_conn = sqlite3.connect(db_path)
     cursor = sqlite_conn.cursor()
-    cursor.execute("""
-    INSERT INTO SDELIVERY (SHIDAT_0, DLVDAT_0, BPDNAM_0, SOHNUM_0, STOFCY_0, SDHTYP_0, INVFLG_0)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (livraison.date_expedition, livraison.date_livraison, livraison.client_livre, livraison.commande_livre, livraison.site_vente, livraison.type, livraison.statut))
-    sqlite_conn.commit()
-    sqlite_conn.close()
-
-    for commande_quantite in livraison.commande_quantites:
+    
+    try:
+        # Generate a semi-unique delivery number
+        sdh_num = f"DLV{int(datetime.now().timestamp())}"
+        
+        # Insert Header (SDELIVERY)
         cursor.execute("""
-        INSERT INTO SDELIVERYD (
-        QTY_0,
-        SHIDAT_0, 
-        DLVDAT_0, 
-        BPDNAM_0, 
-        SOHNUM_0, 
-        STOFCY_0, 
-        SDHTYP_0, 
-        INVFLG_0
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (livraison.date_expedition, livraison.date_livraison, livraison.client_livre, livraison.commande_livre, livraison.site_vente, livraison.type, livraison.statut))
-        sqlite_conn.commit()
-    sqlite_conn.close()
+        INSERT INTO SDELIVERY (SDHNUM_0, SHIDAT_0, DLVDAT_0, BPDNAM_0, SOHNUM_0, STOFCY_0, SDHTYP_0, INVFLG_0)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            sdh_num,
+            request.livraison.date_expedition,
+            request.livraison.date_livraison,
+            request.livraison.client_livre,
+            request.livraison.commande_livre,
+            request.livraison.site_vente,
+            request.livraison.type,
+            request.livraison.statut
+        ))
 
-    return livraison
+        # Insert Lines (SDELIVERYD)
+        for line in request.livraison_quantite:
+            cursor.execute("""
+            INSERT INTO SDELIVERYD (
+                SDHNUM_0,
+                ITMREF_0,
+                QTY_0,
+                SHIDAT_0, 
+                DLVDAT_0, 
+                BPDNAM_0, 
+                SOHNUM_0, 
+                STOFCY_0, 
+                SDHTYP_0, 
+                INVFLG_0
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                sdh_num,
+                line.code,
+                line.quantite,
+                request.livraison.date_expedition,
+                request.livraison.date_livraison,
+                request.livraison.client_livre,
+                request.livraison.commande_livre,
+                request.livraison.site_vente,
+                request.livraison.type,
+                request.livraison.statut
+            ))
+        
+        sqlite_conn.commit()
+    except Exception as e:
+        sqlite_conn.rollback()
+        logger.error(f"Error adding livraison: {e}")
+        raise e
+    finally:
+        sqlite_conn.close()
+
+    return request

@@ -193,29 +193,34 @@ class EmailCSVDownloader:
                 print(f"Error processing CSV file {filepath}: {e}")
 
 
-def run_periodic_download(host, user, password, save_dir, target_db_path, interval=60):
-    """Periodically instantiates the downloader and fetches CSV attachments."""
+def run_email_sync_once(host, user, password, save_dir, target_db_path):
+    """Instantiates the downloader and fetches CSV attachments once."""
     downloader = EmailCSVDownloader(host, user, password, save_dir, target_db_path)
-    while True:
-        try:
-            downloader.download_csv_attachments()
-        except Exception as e:
-            print(f"Error during scheduled download: {e}")
-        time.sleep(interval)
+    try:
+        downloader.download_csv_attachments()
+    except Exception as e:
+        print(f"Error during email sync: {e}")
 
 
 def sync_emails():
     db = SessionLocal()
-    email_config = db.query(POPConfig).first()
-    sqlite_db = db.query(FolderConfig).first()
-    db.close()
-    print(f"Target database path: {sqlite_db.path}")
-    print(f"Email config: {email_config}")
-    run_periodic_download(
-            host=email_config.server,
-            user=email_config.username,
-            password=email_config.password,
-            save_dir="./attachments",
-            target_db_path=sqlite_db.path,  # Pass the target database path
-            interval=3600  # 1 hour
-    )
+    try:
+        email_config = db.query(POPConfig).first()
+        sqlite_db = db.query(FolderConfig).first()
+        
+        if not email_config or not sqlite_db:
+            print("Missing email or database configuration.")
+            return
+
+        print(f"Target database path: {sqlite_db.path}")
+        print(f"Email config: {email_config}")
+        
+        run_email_sync_once(
+                host=email_config.server,
+                user=email_config.username,
+                password=email_config.password,
+                save_dir="./attachments",
+                target_db_path=sqlite_db.path
+        )
+    finally:
+        db.close()

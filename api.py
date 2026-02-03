@@ -33,13 +33,16 @@ logger = logging.getLogger(__name__)
 Base.metadata.create_all(bind=engine)
 
 
+sync_lock = asyncio.Lock()
+
 async def periodic_sync():
     """Run sync_email immediately at startup and then every 15 minutes."""
     while True:
         try:
-            logger.info("Running sync_emails() ...")
-            await asyncio.to_thread(sync_emails)  # run blocking code safely
-            logger.info("sync_emails completed.")
+            async with sync_lock:
+                logger.info("Running sync_emails() ...")
+                await asyncio.to_thread(sync_emails)  # run blocking code safely
+                logger.info("sync_emails completed.")
         except Exception as e:
             logger.error(f" Error in periodic sync: {e}")
         await asyncio.sleep(60 * 15)  # wait 15 minutes before next run
@@ -89,7 +92,6 @@ app.include_router(settings_router)
 def read_root():
     return {"API_CHECK": "UP and Running"}
 
-sync_lock = asyncio.Lock()
 # @app.post("/synchronize")
 # async def sync_endpoint():
 #     async with sync_lock:

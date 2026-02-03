@@ -95,7 +95,7 @@ def get_applied_tax(criterias: List[AppliedTaxInput], db: Session) -> List[Appli
     determinateur = DeterminationTaxe(cursor)
     for criteria in criterias:
         niveau_taxe_article = get_niveau_taxe_article(criteria.item_code, db)
-        legislation = get_legislation(criteria.regime_taxe_tiers)
+        legislation = get_legislation(criteria.regime_taxe_tiers, db)
         code_taxe = determinateur.determiner_code_taxe({
             'regime_taxe_tiers':  criteria.regime_taxe_tiers,
             'niveau_taxe_article': niveau_taxe_article,

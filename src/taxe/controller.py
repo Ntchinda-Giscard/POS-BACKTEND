@@ -19,6 +19,6 @@ def read_regime_taxe(customer_code: str, db: Session = Depends(get_db)):
 
 
 @router.post("/applied/", response_model=List[AppliedTaxResponse])
-def get_taxe_code(criterias: List[AppliedTaxInput]):
+def get_taxe_code(criterias: List[AppliedTaxInput], db: Session = Depends(get_db)):
 
-    return get_applied_tax(criterias)
+    return get_applied_tax(criterias, db)

@@ -42,11 +42,11 @@ def get_regime_taxe(customer_code: str, db: Session) -> TaxeResponse:
     sqlite_conn.close()
     return TaxeResponse(code=code)
 
-def get_niveau_taxe_article(item_code: str) -> str:
+def get_niveau_taxe_article(item_code: str, db: Session) -> str:
     """Fetch tax level from the database."""
     # Simulated database fetch
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite3_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite3_conn.cursor() 
     cursor.execute("""
@@ -62,11 +62,11 @@ def get_niveau_taxe_article(item_code: str) -> str:
     sqlite3_conn.close()
     return niveau
 
-def get_legislation(regime_taxe_tiers: str) -> str:
+def get_legislation(regime_taxe_tiers: str, db: Session) -> str:
     """Fetch legislation from the database."""
     # Simulated database fetch
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite3_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite3_conn.cursor() 
     cursor.execute("""
@@ -82,19 +82,19 @@ def get_legislation(regime_taxe_tiers: str) -> str:
     sqlite3_conn.close()
     return legislation
 
-def get_applied_tax(criterias: List[AppliedTaxInput]) -> List[AppliedTaxResponse]:
+def get_applied_tax(criterias: List[AppliedTaxInput], db: Session) -> List[AppliedTaxResponse]:
     """Determine the applicable tax based on criteria."""
     from .components import DeterminationTaxe
 
     results = []
 
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite3_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite3_conn.cursor()
     determinateur = DeterminationTaxe(cursor)
     for criteria in criterias:
-        niveau_taxe_article = get_niveau_taxe_article(criteria.item_code)
+        niveau_taxe_article = get_niveau_taxe_article(criteria.item_code, db)
         legislation = get_legislation(criteria.regime_taxe_tiers)
         code_taxe = determinateur.determiner_code_taxe({
             'regime_taxe_tiers':  criteria.regime_taxe_tiers,

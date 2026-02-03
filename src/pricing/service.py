@@ -1175,7 +1175,7 @@ def test_calculation_types():
     print(f"- Cascade: 100 - 10 - 5 = {price_cascade} EUR")
     print(f"- Différence: {price_cumulative - price_cascade} EUR")
 
-def test_pricing_engine_complete(input_contexts: List[PricingInput]) -> List[PricingOutput]:
+def test_pricing_engine_complete(input_contexts: List[PricingInput], db: Session) -> List[PricingOutput]:
     """
     Complete test of the Sage X3 pricing engine showing the full breakdown
     
@@ -1185,7 +1185,7 @@ def test_pricing_engine_complete(input_contexts: List[PricingInput]) -> List[Pri
     print("=== Complete Sage X3 Pricing Engine Test ===\n")
     # db_path = "sagex3_seed.db"
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     
     with SageX3PricingEngine(db_path) as engine: # type: ignore
         # Test multiple contexts

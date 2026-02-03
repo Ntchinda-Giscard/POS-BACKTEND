@@ -25,10 +25,10 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-def get_mode_livraison() -> List[ModeDeLivraisonRequest]:
+def get_mode_livraison(db: Session) -> List[ModeDeLivraisonRequest]:
 
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
 
     results = []
@@ -44,10 +44,10 @@ def get_mode_livraison() -> List[ModeDeLivraisonRequest]:
     sqlite_conn.close()
     return results
 
-def get_transporteur() -> List[TransPorteurResponse]:
+def get_transporteur(db: Session) -> List[TransPorteurResponse]:
 
     db_path = ""
-    db_path = get_db_file()
+    db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     results = []
     cursor = sqlite_conn.cursor()

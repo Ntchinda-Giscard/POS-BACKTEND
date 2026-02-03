@@ -182,7 +182,15 @@ def add_livraison(db: Session, livraison: AddLivraisonRequest):
     for commande_quantite in livraison.commande_quantites:
         cursor.execute("""
         INSERT INTO SDELIVERYD (
-        SHIDAT_0, DLVDAT_0, BPDNAM_0, SOHNUM_0, STOFCY_0, SDHTYP_0, INVFLG_0)
+        QTY_0,
+        SHIDAT_0, 
+        DLVDAT_0, 
+        BPDNAM_0, 
+        SOHNUM_0, 
+        STOFCY_0, 
+        SDHTYP_0, 
+        INVFLG_0
+        )
         VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (livraison.date_expedition, livraison.date_livraison, livraison.client_livre, livraison.commande_livre, livraison.site_vente, livraison.type, livraison.statut))
         sqlite_conn.commit()

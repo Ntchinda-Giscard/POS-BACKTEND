@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
 from ..pricing.model import PricingInput, PricingOutput
+from sqlalchemy.orm import Session
 from database.sync_data import get_db_file
 # Configure logging
 logging.basicConfig(level=logging.INFO)

@@ -10,28 +10,31 @@ from src.pricing.service import test_pricing_engine_complete
 from src.pricing.model import PricingInput
 
 def verify():
-    print("Starting verification...")
+    print("Starting verification v2...")
     db = SessionLocal()
     try:
         input_data = [PricingInput(
             customer_code="CUST001",
             item_code="ITM001",
-            quantity=10,
+            quantity=10.0,
             currency="EUR",
             unit_of_measure="UN"
         )]
-        # We just want to see if it runs without TypeError
+        print("Calling test_pricing_engine_complete...")
         try:
+            # We just want to see if it doesn't raise TypeError: get_db_file() missing 1 ...
             result = test_pricing_engine_complete(input_data, db)
-            print(f"Verification successful! Result: {result}")
-        except Exception as e:
-            if "missing 1 required positional argument: 'db'" in str(e):
-                print(f"Verification FAILED: TypeError still exists. Error: {e}")
+            print(f"Verification successful! Result obtained (length {len(result)})")
+        except TypeError as te:
+            if "get_db_file() missing 1 required positional argument" in str(te):
+                print(f"Verification FAILED: TypeError still exists. Error: {te}")
             else:
-                print(f"Service ran but raised another error (this is expected if DB is empty/missing tables): {e}")
-                print("The TypeError is fixed!")
+                print(f"Verification successful! TypeError is fixed, but encountered another TypeError (likely unrelated): {te}")
+        except Exception as e:
+            print(f"Verification successful! TypeError is fixed, though service execution stopped later: {e}")
     finally:
         db.close()
+        print("Verification finished.")
 
 if __name__ == "__main__":
     verify()

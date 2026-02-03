@@ -3,7 +3,8 @@ from .model import (ModeDeLivraisonRequest,
  LivraisonHeader,
  LivraisonType,
  CommandeLivraison,
- CommandeQuantite
+ CommandeQuantite,
+ AddLivraisonRequest
  )
 import sqlite3
 from typing import List
@@ -160,4 +161,31 @@ JOIN ITMMASTER ON SORDERQ.ITMREF_0 = ITMMASTER.ITMREF_0
         result.append(commande_quantite)
     sqlite_conn.close()
     return result
-   
+
+
+def add_livraison(db: Session, livraison: AddLivraisonRequest):
+    """
+        Add a new delivery into the SDELIVERY and SDELIVERYQ tables, 
+        that is the quantity of the delivery
+    """
+    db_path = ""
+    db_path = get_db_file(db)
+    sqlite_conn = sqlite3.connect(db_path) # type: ignore
+    cursor = sqlite_conn.cursor()
+    cursor.execute("""
+    INSERT INTO SDELIVERY (SHIDAT_0, DLVDAT_0, BPDNAM_0, SOHNUM_0, STOFCY_0, SDHTYP_0, INVFLG_0)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (livraison.date_expedition, livraison.date_livraison, livraison.client_livre, livraison.commande_livre, livraison.site_vente, livraison.type, livraison.statut))
+    sqlite_conn.commit()
+    sqlite_conn.close()
+
+    for commande_quantite in livraison.commande_quantites:
+        cursor.execute("""
+        INSERT INTO SDELIVERYD (
+        SHIDAT_0, DLVDAT_0, BPDNAM_0, SOHNUM_0, STOFCY_0, SDHTYP_0, INVFLG_0)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (livraison.date_expedition, livraison.date_livraison, livraison.client_livre, livraison.commande_livre, livraison.site_vente, livraison.type, livraison.statut))
+        sqlite_conn.commit()
+    sqlite_conn.close()
+
+    return livraison

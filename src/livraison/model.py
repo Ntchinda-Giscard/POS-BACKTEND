@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID, uuid4
 
 class ModeDeLivraisonRequest(BaseModel):
@@ -20,6 +20,13 @@ class LivraisonHeader(BaseModel):
     site_vente: Optional[str]
     statut: Optional[str]
 
+
+livraison_quantite: List[CommandeQuantite]
+
+
+class AddLivraisonRequest(BaseModel):
+    livraison: LivraisonHeader
+    livraison_quantite: List[CommandeQuantite]
 
 class LivraisonType(BaseModel):
     code: str

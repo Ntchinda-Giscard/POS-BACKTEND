@@ -137,7 +137,8 @@ def create_commande(inputs: CreateCommandRequest, db: Session):
             line.quantity,
             line.quantity
         ))
-        logger.debug(f"Inserted line item: {line.item_code} with quantity {line.quantity}")
+        
+    logger.info(f"Inserted line item: {sorder_out} ")
     
     sqlite_conn.commit()
     sqlite_conn.close()

@@ -21,13 +21,6 @@ class LivraisonHeader(BaseModel):
     statut: Optional[str]
 
 
-livraison_quantite: List[CommandeQuantite]
-
-
-class AddLivraisonRequest(BaseModel):
-    livraison: LivraisonHeader
-    livraison_quantite: List[CommandeQuantite]
-
 class LivraisonType(BaseModel):
     code: str
 
@@ -42,3 +35,7 @@ class CommandeQuantite(BaseModel):
     quantite: float
     quantite_total: float
     description: str
+
+class AddLivraisonRequest(BaseModel):
+    livraison: LivraisonHeader
+    livraison_quantite: List[CommandeQuantite]

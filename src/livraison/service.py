@@ -204,19 +204,15 @@ def add_livraison(db: Session, request: AddLivraisonRequest):
                 SHIDAT_0, 
                 SOHNUM_0, 
                 STOFCY_0, 
-                SDHTYP_0, 
-                INVFLG_0
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 sdh_num,
                 line.code,
                 line.quantite,
                 request.livraison.date_expedition,
                 request.livraison.commande_livre,
-                request.livraison.site_vente,
-                request.livraison.type,
-                request.livraison.statut
+                request.livraison.site_vente
             ))
         
         sqlite_conn.commit()

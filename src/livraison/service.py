@@ -203,9 +203,9 @@ def add_livraison(db: Session, request: AddLivraisonRequest):
                 QTY_0,
                 SHIDAT_0, 
                 SOHNUM_0, 
-                STOFCY_0, 
+                STOFCY_0
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 sdh_num,
                 line.code,

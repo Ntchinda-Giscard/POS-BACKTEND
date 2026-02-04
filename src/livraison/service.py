@@ -195,19 +195,21 @@ def add_livraison(db: Session, request: AddLivraisonRequest):
         ))
 
         # Insert Lines (SDELIVERYD)
-        for line in request.livraison_quantite:
+        for i, line in enumerate(request.livraison_quantite):
             cursor.execute("""
             INSERT INTO SDELIVERYD (
                 SDHNUM_0,
+                SDDLIN_0,
                 ITMREF_0,
                 QTY_0,
                 SHIDAT_0, 
                 SOHNUM_0, 
                 STOFCY_0
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 sdh_num,
+                (i + 1) * 1000,
                 line.code,
                 line.quantite,
                 request.livraison.date_expedition,

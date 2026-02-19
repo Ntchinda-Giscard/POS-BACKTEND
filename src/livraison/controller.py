@@ -58,4 +58,4 @@ def create_livraison(request: AddLivraisonRequest, db: Session = Depends(get_db)
 
 @router.put("/status")
 def update_status(request: UpdateStatusRequest, db: Session = Depends(get_db)):
-    return update_livraison_status(db, request.id, request.statut)
+    return update_livraison_status(db, request.id, request.status)

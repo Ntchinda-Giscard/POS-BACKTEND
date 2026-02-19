@@ -85,7 +85,7 @@ def get_livraison(db: Session):
             commande_livre=row[4],
             site_vente=row[5],
             type=row[6],
-            statut=row[7]
+            status=row[7]
         )
         results.append(livraison)
     sqlite_conn.close()
@@ -191,7 +191,7 @@ def add_livraison(db: Session, request: AddLivraisonRequest):
             request.livraison.commande_livre,
             request.livraison.site_vente,
             request.livraison.type,
-            request.livraison.statut
+            request.livraison.status
         ))
 
         # Insert Lines (SDELIVERYD)
@@ -253,4 +253,4 @@ def update_livraison_status(db: Session, delivery_id: str, new_status: str):
     finally:
         sqlite_conn.close()
     
-    return {"success": True, "id": delivery_id, "statut": new_status}
+    return {"success": True, "id": delivery_id, "status": new_status}

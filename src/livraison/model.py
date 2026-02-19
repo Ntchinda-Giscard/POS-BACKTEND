@@ -18,7 +18,7 @@ class LivraisonHeader(BaseModel):
     client_livre: Optional[str]
     commande_livre: str
     site_vente: Optional[str]
-    statut: Optional[str]
+    status: Optional[str]
 
 
 class LivraisonType(BaseModel):
@@ -42,4 +42,4 @@ class AddLivraisonRequest(BaseModel):
 
 class UpdateStatusRequest(BaseModel):
     id: str
-    statut: str
+    status: str

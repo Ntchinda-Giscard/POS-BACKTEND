@@ -8,6 +8,8 @@ class SettingsInput(BaseModel):
     username: str
     port: int
     password: str
+    addressVente: Optional[str] = None
+    siteLivraison: Optional[str] = None
 
 class FolderConfigInput(BaseModel):
     path: str

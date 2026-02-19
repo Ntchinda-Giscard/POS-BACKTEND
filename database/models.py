@@ -13,6 +13,8 @@ class POPConfig(Base):
     password = Column(String, nullable=True)
     port = Column(Integer, nullable=True)
     path = Column(String, unique=True, index=True)
+    address_vente = Column(String, nullable=True)
+    site_livraison = Column(String, nullable=True)
 
     def __repr__(self):
         return f"<POPConfig(id={self.id}, server='{self.server}', username='{self.username}', password='{self.password}', port={self.port})>"

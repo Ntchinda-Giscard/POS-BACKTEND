@@ -34,7 +34,9 @@ async def add_settings(settings: SettingsInput, db: Session = Depends(get_db)):
         server=settings.popServer,
         username=settings.username,
         password=settings.password,
-        port=settings.port
+        port=settings.port,
+        address_vente=settings.addressVente,
+        site_livraison=settings.siteLivraison
     )
 
     db.add(new_config)
@@ -53,6 +55,8 @@ async def get_settings(db: Session =Depends(get_db)):
         username=config.username,
         password=config.password,
         port=config.port,
+        addressVente=config.address_vente,
+        siteLivraison=config.site_livraison,
     )
 
 

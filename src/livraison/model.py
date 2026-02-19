@@ -11,7 +11,7 @@ class TransPorteurResponse(BaseModel):
 
 
 class LivraisonHeader(BaseModel):
-    id: UUID
+    id: str
     type: Optional[str]
     date_expedition: Optional[str]
     date_livraison: Optional[str]
@@ -39,3 +39,7 @@ class CommandeQuantite(BaseModel):
 class AddLivraisonRequest(BaseModel):
     livraison: LivraisonHeader
     livraison_quantite: List[CommandeQuantite]
+
+class UpdateStatusRequest(BaseModel):
+    id: str
+    statut: str

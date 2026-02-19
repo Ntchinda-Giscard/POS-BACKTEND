@@ -6,7 +6,8 @@ from .service import (
     get_livraison_type, 
     get_commnde_livrison,
     get_commant_quantite,
-    add_livraison
+    add_livraison,
+    update_livraison_status
 )
 from .model import (
     ModeDeLivraisonRequest, 
@@ -14,7 +15,8 @@ from .model import (
     LivraisonType, 
     CommandeLivraison,
     CommandeQuantite,
-    AddLivraisonRequest
+    AddLivraisonRequest,
+    UpdateStatusRequest
 )
 from database.session import get_db
 from sqlalchemy.orm import Session
@@ -54,3 +56,6 @@ def read_commande_quantite(commande_number: str, db: Session = Depends(get_db)):
 def create_livraison(request: AddLivraisonRequest, db: Session = Depends(get_db)):
     return add_livraison(db, request)
 
+@router.put("/status")
+def update_status(request: UpdateStatusRequest, db: Session = Depends(get_db)):
+    return update_livraison_status(db, request.id, request.statut)

@@ -73,12 +73,12 @@ def get_livraison(db: Session):
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     results = []
     cursor = sqlite_conn.cursor()
-    cursor.execute("SELECT SHIDAT_0, DLVDAT_0, BPDNAM_0, SOHNUM_0, STOFCY_0, SDHTYP_0, INVFLG_0 FROM SDELIVERY")
+    cursor.execute("SELECT SDHNUM_0, SHIDAT_0, DLVDAT_0, BPDNAM_0, SOHNUM_0, STOFCY_0, SDHTYP_0, INVFLG_0 FROM SDELIVERY")
 
     for row in cursor.fetchall():
         logger.debug(f"Fetched livraison row: {row}")
         livraison = LivraisonHeader(
-            id=uuid4(),
+            id=row[0],
             date_expedition=row[0],
             date_livraison=row[1],
             client_livre=row[2],
@@ -226,3 +226,31 @@ def add_livraison(db: Session, request: AddLivraisonRequest):
         sqlite_conn.close()
 
     return request
+
+def update_livraison_status(db: Session, delivery_id: str, new_status: str):
+    """
+    Update the status of a delivery in the SDELIVERY table.
+    """
+    db_path = get_db_file(db)
+    if not db_path:
+        raise Exception("Database path not found")
+        
+    sqlite_conn = sqlite3.connect(db_path)
+    cursor = sqlite_conn.cursor()
+    
+    try:
+        cursor.execute("""
+        UPDATE SDELIVERY 
+        SET INVFLG_0 = ? 
+        WHERE SDHNUM_0 = ?
+        """, (new_status, delivery_id))
+        
+        sqlite_conn.commit()
+    except Exception as e:
+        sqlite_conn.rollback()
+        logger.error(f"Error updating livraison status: {e}")
+        raise e
+    finally:
+        sqlite_conn.close()
+    
+    return {"success": True, "id": delivery_id, "statut": new_status}

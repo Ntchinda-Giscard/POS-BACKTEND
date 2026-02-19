@@ -79,13 +79,13 @@ def get_livraison(db: Session):
         logger.debug(f"Fetched livraison row: {row}")
         livraison = LivraisonHeader(
             id=row[0],
-            date_expedition=row[0],
-            date_livraison=row[1],
-            client_livre=row[2],
-            commande_livre=row[3],
-            site_vente=row[4],
-            type=row[5],
-            statut=row[6]
+            date_expedition=row[1],
+            date_livraison=row[2],
+            client_livre=row[3],
+            commande_livre=row[4],
+            site_vente=row[5],
+            type=row[6],
+            statut=row[7]
         )
         results.append(livraison)
     sqlite_conn.close()

@@ -11,6 +11,12 @@ from src.livraison.controller import router as livraison_router
 from src.facturation.controller import router as facture_router
 from src.pricing.controller import router as pricing_router
 from src.settings.controller import router as settings_router
+from src.payments.controller import router as payment_router
+from src.users.controller import router as users_router
+from src.cash.controller import router as cash_router
+from src.site.controller import router as site_router
+from src.reports.controller import router as reports_router
+from src.export.controller import router as export_router
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import asyncio
@@ -30,7 +36,8 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-Base.metadata.create_all(bind=engine)
+from database.migrate import upgrade as upgrade_local_db
+upgrade_local_db()
 
 
 sync_lock = asyncio.Lock()
@@ -87,16 +94,27 @@ app.include_router(livraison_router)
 app.include_router(facture_router)
 app.include_router(pricing_router)
 app.include_router(settings_router)
+app.include_router(payment_router)
+app.include_router(users_router)
+app.include_router(cash_router)
+app.include_router(site_router)
+app.include_router(reports_router)
+app.include_router(export_router)
 
 @app.get("/")
 def read_root():
     return {"API_CHECK": "UP and Running"}
 
-# @app.post("/synchronize")
-# async def sync_endpoint():
-#     async with sync_lock:
-#         await asyncio.to_thread(sync_data_new)
-#     return {"status": "ok"}
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+@app.post("/synchronize")
+async def sync_endpoint():
+    """Run the email sync now (same job as the 15-minute background task)."""
+    async with sync_lock:
+        await asyncio.to_thread(sync_emails)
+    return {"status": "ok"}
     
 
 if __name__ == "__main__":

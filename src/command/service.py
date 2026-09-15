@@ -1,27 +1,17 @@
-import sqlite3
-from typing import List
-from ..command.model import CommandTypeRRequest, CreateCommandRequest
-import uuid
-from database.sync_data import get_db_file
 import logging
-import sys
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s - %(name)s - %(funcName)s - %(lineno)d - %(threadName)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler('fastapi.log')
-    ]
-)
+import sqlite3
+import uuid
+from datetime import datetime
+from typing import List
+from sqlalchemy.orm import Session
+from database.sync_data import get_db_file
+from ..command.model import CommandTypeRRequest, CreateCommandRequest
 
 logger = logging.getLogger(__name__)
 
-from sqlalchemy.orm import Session
+
 def get_command_types(db: Session = None) -> List[CommandTypeRRequest]:
     """Fetch command types from the database."""
-
-    db_path = ""
     db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     result = []
@@ -29,120 +19,104 @@ def get_command_types(db: Session = None) -> List[CommandTypeRRequest]:
     cursor.execute("SELECT SOHTYP_0, TSODES_0 FROM TABSOHTYP")
 
     for row in cursor.fetchall():
-        logger.debug(f"Fetched command type row: {row}")
         result.append(CommandTypeRRequest(code=row[0], description=row[1]))
     sqlite_conn.close()
     return result
 
+
 def create_commande(inputs: CreateCommandRequest, db: Session):
-    """Create a new command in the database."""
-    sorder_auuid = uuid.uuid4()
-    sorder_binary_id = sorder_auuid.bytes
-    
+    """
+    Write a sales order the way Sage X3 stores it: SORDER header, one SORDERP (price) and one
+    SORDERQ (quantity) row per line, line numbers in steps of 1000. Rows created here have no
+    ZTRANSFERT_0 value, which is how the export to X3 finds them later.
+    """
+    now = datetime.now()
+    order_date = (inputs.order_date or now.strftime("%Y-%m-%d"))[:10] + " 00:00:00"
+    stock_site = inputs.site_stock or inputs.site_vente
+    user = inputs.user_code or "POS"
+
     query_create_sorder = """
-            INSERT INTO
-        SORDER (
-            AUUID_0, -- uuid
-            SOHNUM_0, -- order number
-            VACBPR_0, -- regime taxe
-            SOHTYP_0, -- order type
-            SALFCY_0, -- site de vente
-            BPCORD_0, -- order client
-            BPCINV_0, -- invoice client
-            BPCPYR_0, -- payer client
-            CUR_0, -- currency
-            ORDNOT_0, -- total ligne ht prix
-            ORDATI_0, -- total ligne ttc prix
-            ORDINVNOT_0, -- valorisation Ht
-            ORDINVATI_0, -- valorisation TTC
-            PRITYP_0 -- price type
-        )
-        VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO SORDER (
+            AUUID_0, SOHNUM_0, VACBPR_0, SOHTYP_0, SALFCY_0, STOFCY_0,
+            BPCORD_0, BPCINV_0, BPCPYR_0, CUR_0,
+            ORDNOT_0, ORDATI_0, ORDINVNOT_0, ORDINVATI_0, PRITYP_0,
+            ORDDAT_0, ORDSTA_0, CREUSR_0, CREDAT_0, CREDATTIM_0, UPDUSR_0, UPDDAT_0
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """
+    query_create_sorderp = """
+        INSERT INTO SORDERP (
+            AUUID_0, SOHNUM_0, SOPLIN_0, ITMREF_0, ITMDES_0, SAU_0,
+            GROPRI_0, NETPRI_0, NETPRINOT_0, NETPRIATI_0, VAT_0, FOCFLG_0, CREUSR_0
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """
+    query_create_sorderq = """
+        INSERT INTO SORDERQ (
+            AUUID_0, SOHNUM_0, SOPLIN_0, SOQSEQ_0, ITMREF_0, STOFCY_0, QTY_0, ORIQTY_0, ALLQTY_0, QTYSTU_0
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
 
-    query_create_sorderp = """
-            INSERT INTO SORDERP(
-                AUUID_0,
-                SOHNUM_0,
-                GROPRI_0,
-                NETPRINOT_0,
-                NETPRIATI_0,
-                FOCFLG_0,
-                ITMREF_0
-            )
-            VALUES
-            (?, ?, ?, ?, ?, ?, ?)
-        """
-
-    query_create_sorderq = """
-            INSERT INTO SORDERQ(
-                AUUID_0,
-                SOHNUM_0,
-                ITMREF_0,
-                QTY_0,
-                ALLQTY_0
-            )
-            VALUES
-            (?, ?, ?, ?, ?)
-        """
-    
-    db_path = ""
     db_path = get_db_file(db)
     sqlite_conn = sqlite3.connect(db_path) # type: ignore
     cursor = sqlite_conn.cursor()
-
-    # sohnnum = str(uuid.uuid4())[:8]  # Generate a unique order number
     sohnnum = inputs.num_comd
 
-    sorder_out = cursor.execute( query_create_sorder,(
-        sorder_binary_id,
-        sohnnum,
-        inputs.regime_taxe,
-        inputs.comd_type,
-        inputs.site_vente,
-        inputs.client_comd,
-        inputs.client_facture,
-        inputs.client_payeur,
-        inputs.currency,
-        inputs.total_ht,
-        inputs.total_ttc,
-        inputs.valo_ht,
-        inputs.valo_ttc,
-        inputs.price_type
-    ))
-
-    for line in inputs.ligne:
-        sorderp_auuid = uuid.uuid4()
-        sorderp_binary_id = sorderp_auuid.bytes
-        sorderq_auuid = uuid.uuid4()
-        sorderq_binary_id = sorderq_auuid.bytes
-        focflg_value = 1 if (line.free_items is not None and len(line.free_items) > 0) else 0
-
-
-        sorderp_out = cursor.execute( query_create_sorderp,(
-            sorderp_binary_id,
+    try:
+        cursor.execute(query_create_sorder, (
+            uuid.uuid4().bytes,
             sohnnum,
-            line.prix_brut,
-            line.prix_net_ht,
-            line.prix_net_ttc,
-            focflg_value,
-            line.item_code
+            inputs.regime_taxe,
+            inputs.comd_type,
+            inputs.site_vente,
+            stock_site,
+            inputs.client_comd,
+            inputs.client_facture,
+            inputs.client_payeur,
+            inputs.currency,
+            inputs.total_ht,
+            inputs.total_ttc,
+            inputs.valo_ht,
+            inputs.valo_ttc,
+            inputs.price_type,
+            order_date,
+            "1",                      # ORDSTA_0: 1 = open
+            user,
+            now.strftime("%Y-%m-%d 00:00:00"),
+            now.strftime("%Y-%m-%d %H:%M:%S"),
+            user,
+            now.strftime("%Y-%m-%d 00:00:00"),
         ))
 
-        sorderq_out = cursor.execute( query_create_sorderq,(
-            sorderp_binary_id,
-            sohnnum,
-            line.item_code,
-            line.quantity,
-            line.quantity
-        ))
-        
-    logger.info(f"Inserted line item: {sorder_out} ")
-    
-    sqlite_conn.commit()
-    sqlite_conn.close()
-    return { 'sorder': sohnnum }
+        for index, line in enumerate(inputs.ligne, start=1):
+            line_number = index * 1000
+            description = line.description
+            unit = line.unit
+            if not description or not unit:
+                item = cursor.execute(
+                    "SELECT ITMDES1_0, COALESCE(NULLIF(TRIM(SAU_0), ''), STU_0) FROM ITMMASTER WHERE ITMREF_0 = ?",
+                    (line.item_code,),
+                ).fetchone()
+                if item:
+                    description = description or (item[0] or "").strip()
+                    unit = unit or (item[1] or "").strip()
+            focflg_value = 1 if (line.free_items is not None and len(line.free_items) > 0) else 0
 
+            cursor.execute(query_create_sorderp, (
+                uuid.uuid4().bytes, sohnnum, line_number, line.item_code, description or "", unit or "",
+                line.prix_brut if line.prix_brut is not None else line.prix_net_ht,
+                line.prix_net_ht, line.prix_net_ht, line.prix_net_ttc,
+                line.tax_code or "", focflg_value, user,
+            ))
+            cursor.execute(query_create_sorderq, (
+                uuid.uuid4().bytes, sohnnum, line_number, line_number, line.item_code, stock_site,
+                line.quantity, line.quantity, line.quantity, line.quantity,
+            ))
 
-   
+        sqlite_conn.commit()
+    except Exception:
+        sqlite_conn.rollback()
+        raise
+    finally:
+        sqlite_conn.close()
+
+    logger.info(f"Created order {sohnnum} ({len(inputs.ligne)} lines) by {user}")
+    return {'sorder': sohnnum}

@@ -1,12 +1,11 @@
 import logging
-import sys
+from typing import Dict, Optional
 from database.session import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from .model import FolderConfigInput, SettingsInput
+from .service import get_all_settings, set_settings
 from sqlalchemy.orm import Session
 from database.models import FolderConfig, POPConfig
-# yswh hzrp nnpw edgj
-# ae011site@gmail.com
 
 
 router = APIRouter(
@@ -14,18 +13,12 @@ router = APIRouter(
     tags=["Settings"]
 )
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s - %(name)s - %(funcName)s - %(lineno)d - %(threadName)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler('fastapi.log')
-    ]
-)
+logger = logging.getLogger(__name__)
+
 
 @router.post("/add", response_model=SettingsInput)
 async def add_settings(settings: SettingsInput, db: Session = Depends(get_db)):
-    logging.debug(f"Received settings to add: {settings}")
+    logger.debug(f"Received settings to add: server={settings.popServer} user={settings.username}")
     # Here you would add logic to save settings to the database
     db.query(POPConfig).delete()  # Clear existing settings for simplicity
     db.commit()
@@ -46,10 +39,11 @@ async def add_settings(settings: SettingsInput, db: Session = Depends(get_db)):
 
     return settings
 
-@router.get("/get", response_model=SettingsInput)
+@router.get("/get", response_model=Optional[SettingsInput])
 async def get_settings(db: Session =Depends(get_db)):
     config = db.query(POPConfig).first()
-    
+    if not config:
+        return None
     return SettingsInput(
         popServer=config.server,
         username=config.username,
@@ -74,14 +68,14 @@ async def add_folder_db( add_config: FolderConfigInput, db: Session = Depends(ge
         db.refresh(folder_config)
         return add_config
     except Exception as e:
-        logging.error(f"Error saving folder configuration: {e}")
-        return HTTPException(
+        logger.error(f"Error saving folder configuration: {e}")
+        raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str('Une erreur est survenue lors de la sauvegarde de la configuration du dossier.'),
         )
 
 
-@router.get("/get/folder", response_model=FolderConfigInput)
+@router.get("/get/folder", response_model=Optional[FolderConfigInput])
 async def get_folder_db( db: Session = Depends(get_db)):
     config = db.query(FolderConfig).first()
     if config:
@@ -89,3 +83,14 @@ async def get_folder_db( db: Session = Depends(get_db)):
             path=config.path # type: ignore
         )
     return None
+
+
+@router.get("/app", response_model=Dict[str, str])
+def read_app_settings(db: Session = Depends(get_db)):
+    """Till settings: low stock threshold, export folder / recipient, SMTP, receipt footer."""
+    return get_all_settings(db)
+
+
+@router.put("/app", response_model=Dict[str, str])
+def write_app_settings(values: Dict[str, Optional[str]], db: Session = Depends(get_db)):
+    return set_settings(db, values)

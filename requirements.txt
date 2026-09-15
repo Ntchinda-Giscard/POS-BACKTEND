@@ -1,3 +1,5 @@
 uvicorn[standard]
 fastapi
 sqlalchemy
+
+pyinstaller  # packaging only: builds dist/api.exe (api.spec)

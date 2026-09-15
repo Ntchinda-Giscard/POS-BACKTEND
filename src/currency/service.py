@@ -24,10 +24,7 @@ def get_commande_currrency(customer_code: str, db: Session) -> CurrencyResponse:
     cursor = sqlite_conn.cursor()
     cursor.execute("SELECT CUR_0 FROM BPCUSTOMER WHERE BPCNUM_0 = ? ", (customer_code,))
     row = cursor.fetchone()
-    logger.debug(f"Fetched currency row: {row}")
-    currency = CurrencyResponse(
-            code=row[0],
-        )
     sqlite_conn.close()
+    currency = CurrencyResponse(code=row[0] if row else "")
     
     return currency

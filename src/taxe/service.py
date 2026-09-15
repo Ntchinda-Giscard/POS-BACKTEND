@@ -36,8 +36,8 @@ def get_regime_taxe(customer_code: str, db: Session) -> TaxeResponse:
         WHERE
             BPCNUM_0 = ?
                    """, (customer_code,))
-    code = cursor.fetchone()[0]
-    logger.debug(f"Fetched tax regime code: {code}")
+    row = cursor.fetchone()
+    code = row[0] if row else ""
     cursor.close()
     sqlite_conn.close()
     return TaxeResponse(code=code)
@@ -57,7 +57,8 @@ def get_niveau_taxe_article(item_code: str, db: Session) -> str:
         WHERE
             ITMREF_0 = ?
                    """, (item_code,))
-    niveau = cursor.fetchone()[0]
+    row = cursor.fetchone()
+    niveau = row[0] if row else ""
     cursor.close()
     sqlite3_conn.close()
     return niveau

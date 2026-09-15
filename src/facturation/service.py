@@ -27,10 +27,8 @@ def get_payment_methode(customer_code: str, db: Session) -> PayementMode:
     cursor.execute("SELECT  PTE_0 FROM BPCUSTOMER WHERE BPCNUM_0 = ?", (customer_code, ))
 
     row = cursor.fetchone()
-    logger.debug(f"Fetched payment method row: {row}")
     sqlite_conn.close()
-
-    return PayementMode(code= row[0])
+    return PayementMode(code=row[0] if row else "")
 
 def get_escomte(customer_code: str, db: Session) -> Escomte:
 
@@ -42,10 +40,8 @@ def get_escomte(customer_code: str, db: Session) -> Escomte:
     cursor.execute("SELECT  DEP_0 FROM BPCUSTOMER WHERE BPCINV_0 = ? ", (customer_code,))
 
     row = cursor.fetchone()
-    logger.debug(f"Fetched escomte row: {row}")
     sqlite_conn.close()
-
-    return Escomte(code=row[0])
+    return Escomte(code=row[0] if row else "")
 
 def get_cond_fac(customer_code: str, db: Session) -> CondFacResponse:
 
@@ -57,10 +53,8 @@ def get_cond_fac(customer_code: str, db: Session) -> CondFacResponse:
     cursor.execute("SELECT  INVCND_0 FROM BPCUSTOMER WHERE BPCINV_0 = ?", (customer_code,))
 
     row = cursor.fetchone()
-    logger.debug(f"Fetched cond fac row: {row}")
     sqlite_conn.close()
-
-    return CondFacResponse(code=row[0])
+    return CondFacResponse(code=row[0] if row else "")
 
 def get_element_facturation(customer_code: str, db: Session) -> List[ElementFacturation]:
 
